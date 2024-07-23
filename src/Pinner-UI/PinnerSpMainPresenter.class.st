@@ -17,7 +17,6 @@ PinnerSpMainPresenter >> classActions [
 
 	^ CmCommandGroup forSpec
 		beRoot;
-		register: (PinnerBrowseItemCommand forSpecContext: self);
 		register: (SpBrowseClassCommand forSpecContext: self);
 		register: (SpBrowseClassReferencesCommand forSpecContext: self);
 		yourself
@@ -67,6 +66,7 @@ PinnerSpMainPresenter >> initializePresenters [
 		display: [ : pkg | pkg name ];
 		displayIcon: [ : pkg | self iconNamed: #package ];
 		contextMenu: [ self packageActions asMenuPresenter ];
+		"contextKeyBindings: self contextMenuKeyBindings;"
 		items: self collector packages;
 		yourself.
 	classesListPresenter := self newList
@@ -74,6 +74,7 @@ PinnerSpMainPresenter >> initializePresenters [
 		headerTitle: 'Classes';
 		displayIcon: [ : cls | self iconNamed: cls systemIconName ];
 		contextMenu: [ self classActions asMenuPresenter ];
+		"contextKeyBindings: self contextMenuKeyBindings;"
 		items: self collector classes;
 		yourself.
 	methodsListPresenter := self newList
@@ -81,6 +82,7 @@ PinnerSpMainPresenter >> initializePresenters [
 		display: [ : cm | self displayCompiledMethod: cm  ];
 		displayIcon: [ : cm | self iconNamed: cm systemIconName ];
 		contextMenu: [ self methodActions asMenuPresenter ];
+		"contextKeyBindings: self contextMenuKeyBindings;"
 		headerTitle: 'Methods';
 		items: self collector methods;
 		yourself.
