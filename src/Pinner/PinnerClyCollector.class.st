@@ -10,64 +10,47 @@ PinnerClyClassCollector new collect.
 "
 Class {
 	#name : 'PinnerClyCollector',
-	#superclass : 'Object',
-	#category : 'Pinner-Collector',
+	#superclass : 'PinnerCollector',
+	#category : 'Pinner-Calypso',
 	#package : 'Pinner',
-	#tag : 'Collector'
+	#tag : 'Calypso'
 }
 
 { #category : 'examples' }
 PinnerClyCollector class >> exampleClasses [
 
-	self new collectClasses inspect
+	self new classes inspect
 ]
 
 { #category : 'examples' }
 PinnerClyCollector class >> examplePackages [
 
-	self new collectPackages inspect
+	self new packages inspect
 ]
 
 { #category : 'accessing' }
-PinnerClyCollector >> collectAll [
-	"Answer a <Collection> of recently visited classes"
-	
-	^ self flattenedHistory collect: #selection
+PinnerClyCollector >> browsingHistory [
+	"If we have a browser attached, then answer a <Collection> of its browsing history <ClyNavigationHistory> instances, otherwise answer all current history instances"
 
+	^ self browser
+		ifNil: [ ClyNavigationHistory allInstances ]
+		ifNotNil: [ : b | { b navigationHistory } ]
 ]
 
 { #category : 'accessing' }
-PinnerClyCollector >> collectClasses [
-	"Answer a <Collection> of recently visited classes"
-	
-	^ (self flattenedHistory select: [ : obj | obj isClass ]) asSet
+PinnerClyCollector >> history [
+	"Answer a <Collection> of objects stored in the receiver's history. Note that in Calypso, the current selection IS NOT part of the history"
 
-]
+	| selectedViewStates |
 
-{ #category : 'accessing' }
-PinnerClyCollector >> collectMethods [
-	"Answer a <Collection> of recently visited methods"
-	
-	^ (self flattenedHistory select: [ : obj | obj isCompiledMethod ]) asSet
+	selectedViewStates := self browsingHistory flatCollect: [ : aClyNavHistory |
+			aClyNavHistory undoList collect: [ : fullBrowserState |
+				| realBrowserState |
+				realBrowserState := (fullBrowserState isKindOf: ClyAccrossWindowNavigationState)
+					ifTrue: [ fullBrowserState browserState ]
+					ifFalse: [ fullBrowserState ].
+				realBrowserState viewStates
+					select: [ : viewState | viewState selection hasSelectedItems ] ] ].
 
-]
-
-{ #category : 'accessing' }
-PinnerClyCollector >> collectPackages [
-	"Answer a <Collection> of recently visited packages"
-	
-	^ (self flattenedHistory select: [ : obj | obj isPackage ]) asSet
-
-]
-
-{ #category : 'accessing' }
-PinnerClyCollector >> flattenedHistory [
-
-	^ ((ClyNavigationHistory allInstances 
-		flatCollect: [ : nh |
-			nh undoList collect: [ : fullBrowserState |
-				fullBrowserState viewStates 
-					select: [ : viewState | viewState selection hasSelectedItems ] ] ])
-						select: #notEmpty) flattened
-							collect: [ : queryState | queryState selection actualObjects anyOne ]
+	^ (selectedViewStates select: #notEmpty) flattened collect: [ : queryState | queryState selection actualObjects anyOne ]
 ]
