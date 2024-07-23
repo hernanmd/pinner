@@ -15,11 +15,13 @@ BaselineOfPinner >> baseline: spec [
 			
 			spec 
 				package: 'Pinner'        with: [ spec requires: #(ContainersOrderedSet) ];
-				package: 'Pinner-Tests'	with: [ spec requires: #(Pinner) ].
+				package: 'Pinner-UI'     with: [ spec requires: #(Pinner) ];
+				package: 'Pinner-Tests'	with: [ spec requires: #(Pinner 'Pinner-UI') ].
 			spec 
 				group: 'Core' 						with: #('Pinner');
+				group: 'UI'                    with: #('Core' 'Pinner-UI');
 				group: 'Tests' 						with: #('Pinner' 'Pinner-Tests');
-				group: 'default' 					with: #('Core' 'Tests') ]
+				group: 'default' 					with: #('Core' 'UI' 'Tests') ]
 ]
 
 { #category : 'baselines' }
