@@ -18,6 +18,7 @@ PinnerSpMainPresenter >> classActions [
 	^ CmCommandGroup forSpec
 		beRoot;
 		register: (SpBrowseClassCommand forSpecContext: self);
+		register: (SpBrowseClassHierarchyCommand forSpecContext: self);
 		register: (SpBrowseClassReferencesCommand forSpecContext: self);
 		yourself
 ]
@@ -46,6 +47,52 @@ PinnerSpMainPresenter >> displayCompiledMethod: cm [
 			<< cm methodClass asString;
 			<< '>>';
 			<< cm selector ]
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseClass [
+
+	self systemNavigation browse: classesListPresenter selectedItem
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseClassReferences [
+
+	| result classOrTrait |
+	
+	result := classesListPresenter selectedItem.
+	(result isClass or: [ result isTrait ])
+		ifFalse: [ result := result class ].
+
+	classOrTrait := result instanceSide.
+	classOrTrait isTrait
+		ifTrue: [ self systemNavigation browseAllUsersOfTrait: classOrTrait ]
+		ifFalse: [ self systemNavigation browseAllCallsOnClass: classOrTrait ]
+
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseHierarchy [
+
+	self systemNavigation browseHierarchy: classesListPresenter selectedItem
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseImplementors [
+
+	self systemNavigation browseAllImplementorsOf: methodsListPresenter selectedItem selector
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseMethodReferences [
+
+	self systemNavigation browseAllSendersOrUsersOf: methodsListPresenter selectedItem selector.
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowseSenders [
+
+	self systemNavigation browseAllSendersOf: methodsListPresenter selectedItem selector
 ]
 
 { #category : 'layout' }
@@ -103,17 +150,18 @@ PinnerSpMainPresenter >> initializeWindow: aWindowPresenter [
 { #category : 'private' }
 PinnerSpMainPresenter >> methodActions [
 
-	^ CmCommandGroup forSpec
+	^ CmCommandGroup forSpec 
 		beRoot;
-		register: (StPlaygroundAdoptVersionCommand forSpecContext: self);
-		register: (StPlaygroundAdoptVersionOnNewPlaygroundCommand forSpecContext: self);
+		register: (SpBrowseMethodReferencesCommand forSpecContext: self);
+		register: (SpBrowseImplementorsCommand forSpecContext: self);
+		register: (SpBrowseSendersCommand forSpecContext: self);
 		yourself
 ]
 
 { #category : 'private' }
 PinnerSpMainPresenter >> packageActions [
 
-	^ CmCommandGroup forSpec
+	^ CmCommandGroup forSpec 
 		beRoot;
 		register: (PinnerBrowseItemCommand forSpecContext: self);
 		register: (PinnerBrowseDependenciesCommand forSpecContext: self);
