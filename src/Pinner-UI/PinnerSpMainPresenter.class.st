@@ -90,6 +90,22 @@ PinnerSpMainPresenter >> doBrowseMethodReferences [
 ]
 
 { #category : 'actions' }
+PinnerSpMainPresenter >> doBrowsePackage [
+
+	self systemNavigation browse: packagesListPresenter selectedItem
+]
+
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doBrowsePackageDependencies [
+
+	| analyzedPackage presenter |
+	analyzedPackage := DADependencyChecker new daPackageFor: packagesListPresenter selectedItem name.
+	presenter := DATabPackageDependenciesPresenter on: analyzedPackage.
+	presenter open.
+	presenter withWindowDo: [ : w | w title: 'Package Dependencies' ].
+]
+
+{ #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseSenders [
 
 	self systemNavigation browseAllSendersOf: methodsListPresenter selectedItem selector
@@ -163,7 +179,7 @@ PinnerSpMainPresenter >> packageActions [
 
 	^ CmCommandGroup forSpec 
 		beRoot;
-		register: (PinnerBrowseItemCommand forSpecContext: self);
+		register: (PinnerBrowsePackageCommand forSpecContext: self);
 		register: (PinnerBrowseDependenciesCommand forSpecContext: self);
 		yourself
 ]

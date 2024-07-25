@@ -23,3 +23,9 @@ PinnerBrowseDependenciesCommand class >> order [
 
 	^ 2
 ]
+
+{ #category : 'executing' }
+PinnerBrowseDependenciesCommand >> execute [
+
+	self context doBrowsePackageDependencies.
+]
