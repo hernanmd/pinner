@@ -4,10 +4,35 @@ Class {
 	#instVars : [
 		'collector'
 	],
+	#classInstVars : [
+		'collectorClass'
+	],
 	#category : 'Pinner-UI-Core',
 	#package : 'Pinner-UI',
 	#tag : 'Core'
 }
+
+{ #category : 'accessing' }
+PinnerSpApplication class >> collectorClass [
+	"Answer a <PinnerCollector>"
+
+	^ collectorClass
+		ifNil: [ collectorClass := self defaultCollectorClass ]
+]
+
+{ #category : 'accessing' }
+PinnerSpApplication class >> collectorClass: anObject [
+
+	collectorClass := anObject
+]
+
+{ #category : 'accessing' }
+PinnerSpApplication class >> defaultCollectorClass [
+
+	^ self environment
+		at: #PinnerClyCollector
+		ifAbsent: [ self error: 'Default history collector not available' ]
+]
 
 { #category : 'private' }
 PinnerSpApplication class >> menuPinnerOn: aBuilder [
@@ -27,7 +52,7 @@ PinnerSpApplication class >> startApplication [
 	<script>
 
 	PinnerSpApplication new
-		collector: PinnerClyCollector new;
+		collector: self collectorClass new;
 		start
 ]
 
@@ -37,14 +62,14 @@ PinnerSpApplication >> collector [
 ]
 
 { #category : 'accessing' }
-PinnerSpApplication >> collector: aPinnerClyCollector [ 
+PinnerSpApplication >> collector: aPinnerCollector [
 
-	collector := aPinnerClyCollector
+	collector := aPinnerCollector
 ]
 
 { #category : 'running' }
 PinnerSpApplication >> start [
 	" Private - See superimplementor's comment "
 
-	(PinnerSpMainPresenter newApplication: self model: self collector) open.
+	(PinnerSpMainPresenter newApplication: self model: self collector) open
 ]

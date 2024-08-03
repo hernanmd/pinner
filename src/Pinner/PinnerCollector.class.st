@@ -1,12 +1,24 @@
+"
+Abstract class to hold browsing history behavior, regardless of specific browser implementation. The main method is `history` which retrieves the `Collection` of the browser history it holds.
+
+It contains: 
+- A reference to a browser.
+- A `Collection` of 
+  - Packages: instances of `Package`,
+  - Package tags: instances of `PackageTag`,
+  - Classes: instances of `Class`,
+  - And methods: instances of `CompiledMethod`
+
+"
 Class {
 	#name : 'PinnerCollector',
 	#superclass : 'Object',
 	#instVars : [
 		'browser'
 	],
-	#category : 'Pinner-Calypso',
+	#category : 'Pinner-Core',
 	#package : 'Pinner',
-	#tag : 'Calypso'
+	#tag : 'Core'
 }
 
 { #category : 'accessing' }

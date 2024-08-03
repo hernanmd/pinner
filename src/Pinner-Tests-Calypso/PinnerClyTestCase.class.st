@@ -5,8 +5,7 @@ Class {
 		'browser'
 	],
 	#category : 'Pinner-Tests-Calypso',
-	#package : 'Pinner-Tests',
-	#tag : 'Calypso'
+	#package : 'Pinner-Tests-Calypso'
 }
 
 { #category : 'running' }

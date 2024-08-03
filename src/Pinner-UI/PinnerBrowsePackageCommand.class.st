@@ -15,7 +15,7 @@ PinnerBrowsePackageCommand class >> defaultDescription [
 { #category : 'default' }
 PinnerBrowsePackageCommand class >> defaultIconName [
 
-	^ #smallHierarchyBrowser 
+	^ #smallHierarchyBrowser
 ]
 
 { #category : 'default' }

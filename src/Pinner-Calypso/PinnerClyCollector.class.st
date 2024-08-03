@@ -12,8 +12,7 @@ Class {
 	#name : 'PinnerClyCollector',
 	#superclass : 'PinnerCollector',
 	#category : 'Pinner-Calypso',
-	#package : 'Pinner',
-	#tag : 'Calypso'
+	#package : 'Pinner-Calypso'
 }
 
 { #category : 'examples' }
