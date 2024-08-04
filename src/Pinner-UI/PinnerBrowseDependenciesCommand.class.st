@@ -1,6 +1,6 @@
 Class {
 	#name : 'PinnerBrowseDependenciesCommand',
-	#superclass : 'CmCommand',
+	#superclass : 'PinnerPackageBrowseCommand',
 	#category : 'Pinner-UI-Commands',
 	#package : 'Pinner-UI',
 	#tag : 'Commands'

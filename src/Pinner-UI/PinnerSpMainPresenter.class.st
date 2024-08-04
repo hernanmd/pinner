@@ -1,11 +1,12 @@
 "
-Provides a Spec presenter window with three browsing history lists:
+Provides a Spec presenter with three browsing history lists:
 
 - Packages
 - Classes
 - Methods
 
-It also provides callback methods for actions on each selected item.
+When a package is selected, all visited classes that belong to the selected package are displayed. Similarily, when a class is selected, all visited methods that belong to the selected class are displayed.
+
 "
 Class {
 	#name : 'PinnerSpMainPresenter',
@@ -14,7 +15,8 @@ Class {
 		'packagesListPresenter',
 		'classesListPresenter',
 		'methodsListPresenter',
-		'collector'
+		'collector',
+		'oldSelectedPackage'
 	],
 	#category : 'Pinner-UI-Core',
 	#package : 'Pinner-UI',
@@ -119,6 +121,12 @@ PinnerSpMainPresenter >> doBrowseSenders [
 	self systemNavigation browseAllSendersOf: methodsListPresenter selectedItem selector
 ]
 
+{ #category : 'testing' }
+PinnerSpMainPresenter >> hasSelectedPackage [
+
+	^ packagesListPresenter selectedItem notNil
+]
+
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeClassesList [
 
@@ -175,10 +183,19 @@ PinnerSpMainPresenter >> initializePackagesList [
 PinnerSpMainPresenter >> initializePresenters [
 
 	self
-		initializePackagesList;
-		initializeClassesList;
 		initializeMethodsList;
+		initializeClassesList;
+		initializePackagesList;
+		initializeTiling;
 		initializeFocus
+]
+
+{ #category : 'initialization' }
+PinnerSpMainPresenter >> initializeTiling [
+	"Private - Try to tile the receiver if supported"
+	
+	self whenVisibleChangedDo: [ : this | .
+		this widget tileRight ]
 ]
 
 { #category : 'initialization' }
@@ -188,7 +205,6 @@ PinnerSpMainPresenter >> initializeWindow: aWindowPresenter [
 	aWindowPresenter
 		title: 'Pinner';
 		windowIcon: (self iconNamed: #history);
-		initialExtent: (400 @ 600) scaledByDisplayScaleFactor;
 		aboutText: 'Pinner: A recent browsing history viewer'
 ]
 
@@ -203,14 +219,47 @@ PinnerSpMainPresenter >> methodActions [
 		yourself
 ]
 
+{ #category : 'showing' }
+PinnerSpMainPresenter >> open [ 
+
+	super open.
+	self withWindowDo: [ : w | 
+		"Tiling should not change the configured width"
+		w adapter widget width: 200 scaledByDisplayScaleFactor.
+		w adapter widget tileRight; toggleStickiness ].
+]
+
 { #category : 'private' }
 PinnerSpMainPresenter >> packageActions [
 
 	^ CmCommandGroup forSpec
 		beRoot;
-		register: (PinnerBrowsePackageCommand forSpecContext: self);
-		register: (PinnerBrowseDependenciesCommand forSpecContext: self);
+		register: ((CmCommandGroup named: 'Browsing commands') asSpecGroup
+			register: ((PinnerBrowseDependenciesCommand 	
+				forSpecWithIconNamed: #smallHierarchyBrowser
+				shortcutKey: 'D' asShortcut)
+					context: self);
+			register: ((PinnerBrowsePackageCommand 
+				forSpecWithIconNamed: #smallHierarchyBrowser
+				shortcutKey: 'B' asShortcut)
+					context: self);
+			beDisplayedAsGroup;
+			yourself);
+		register: ((PinnerResetHistoryCommand 
+			forSpecWithIconNamed: #back
+			shortcutKey: 'R' asShortcut)
+				context: self);
 		yourself
+]
+
+{ #category : 'callbacks' }
+PinnerSpMainPresenter >> resetAllSelections [
+	"Private - It seems to be a bug in Spec2 because list selection keeps selected regardless of sending:
+	resetListSelection; refresh; updateList "
+
+	packagesListPresenter items: self visitedPackages.
+	classesListPresenter items: self visitedClasses.
+	methodsListPresenter items: self visitedMethods
 ]
 
 { #category : 'accessing - model' }
@@ -221,16 +270,47 @@ PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
-	"Private - Callback to package selection"
+	"Private - Package selection callback to update class list with those classes that belongs to aPackageOrNil"
 
 	aPackageOrNil
-		ifNotNil: [ : package | classesListPresenter items: (package classes difference: Set empty)  ]
+		ifNotNil: [ : package | 
+			"If selected item is the same as the one already selected, we unselect and clean selection"
+			package = oldSelectedPackage  
+				ifTrue: [ self resetAllSelections ]
+				ifFalse: [ 
+					| filteredItems |
+					filteredItems := package classes select: [ : c | self visitedClasses includes: c ].
+					classesListPresenter items: filteredItems asOrderedSet.
+					methodsListPresenter items: Array empty.
+					oldSelectedPackage := package ] ]
 ]
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
-	"Private - Callback to class selection"
+	"Private - Class selection callback to update methods list with those methods that belongs to aClassOrNil"
 
 	aClassOrNil
-		ifNotNil: [ : class | methodsListPresenter items: (class methods difference: Set empty)  ]
+		ifNotNil: [ : class | 
+			| filteredItems |.
+			filteredItems := class methods select: [ : c | self visitedMethods includes: c ].
+			methodsListPresenter items: filteredItems asOrderedSet ]
+]
+
+{ #category : 'accessing' }
+PinnerSpMainPresenter >> visitedClasses [
+
+	^ self collector classes
+]
+
+{ #category : 'accessing' }
+PinnerSpMainPresenter >> visitedMethods [
+
+	^ self collector methods
+]
+
+{ #category : 'accessing' }
+PinnerSpMainPresenter >> visitedPackages [
+	"Answer a <Collection> of the visited packages in the system"
+
+	^ self collector packages
 ]

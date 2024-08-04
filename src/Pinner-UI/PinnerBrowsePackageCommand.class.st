@@ -1,6 +1,6 @@
 Class {
 	#name : 'PinnerBrowsePackageCommand',
-	#superclass : 'CmCommand',
+	#superclass : 'PinnerPackageBrowseCommand',
 	#category : 'Pinner-UI-Commands',
 	#package : 'Pinner-UI',
 	#tag : 'Commands'
@@ -21,7 +21,7 @@ PinnerBrowsePackageCommand class >> defaultIconName [
 { #category : 'default' }
 PinnerBrowsePackageCommand class >> defaultName [
 
-	^ 'Browse'
+	^ 'Browse package'
 ]
 
 { #category : 'default' }
