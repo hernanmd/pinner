@@ -121,6 +121,24 @@ PinnerSpMainPresenter >> doBrowseSenders [
 	self systemNavigation browseAllSendersOf: methodsListPresenter selectedItem selector
 ]
 
+{ #category : 'actions' }
+PinnerSpMainPresenter >> doResetHistory [
+	"Private - Remove all pinned objects in the receiver"
+
+	self collector resetHistory.
+	self
+		updatePackages: self collector collectionClass empty;
+		updateClasses: self collector collectionClass empty;
+		updateMethods: self collector collectionClass empty
+]
+
+{ #category : 'testing' }
+PinnerSpMainPresenter >> hasPinnedHistory [
+	"Answer <true> if the receiver contains any history recorded"
+
+	^ self collector hasPinnedHistory
+]
+
 { #category : 'testing' }
 PinnerSpMainPresenter >> hasSelectedPackage [
 
@@ -193,7 +211,7 @@ PinnerSpMainPresenter >> initializePresenters [
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeTiling [
 	"Private - Try to tile the receiver if supported"
-	
+
 	self whenVisibleChangedDo: [ : this | .
 		this widget tileRight ]
 ]
@@ -220,13 +238,13 @@ PinnerSpMainPresenter >> methodActions [
 ]
 
 { #category : 'showing' }
-PinnerSpMainPresenter >> open [ 
+PinnerSpMainPresenter >> open [
 
 	super open.
-	self withWindowDo: [ : w | 
+	self withWindowDo: [ : w |
 		"Tiling should not change the configured width"
 		w adapter widget width: 200 scaledByDisplayScaleFactor.
-		w adapter widget tileRight; toggleStickiness ].
+		w adapter widget tileRight; toggleStickiness ]
 ]
 
 { #category : 'private' }
@@ -235,17 +253,17 @@ PinnerSpMainPresenter >> packageActions [
 	^ CmCommandGroup forSpec
 		beRoot;
 		register: ((CmCommandGroup named: 'Browsing commands') asSpecGroup
-			register: ((PinnerBrowseDependenciesCommand 	
+			register: ((PinnerBrowseDependenciesCommand
 				forSpecWithIconNamed: #smallHierarchyBrowser
 				shortcutKey: 'D' asShortcut)
 					context: self);
-			register: ((PinnerBrowsePackageCommand 
+			register: ((PinnerBrowsePackageCommand
 				forSpecWithIconNamed: #smallHierarchyBrowser
 				shortcutKey: 'B' asShortcut)
 					context: self);
 			beDisplayedAsGroup;
 			yourself);
-		register: ((PinnerResetHistoryCommand 
+		register: ((PinnerResetHistoryCommand
 			forSpecWithIconNamed: #back
 			shortcutKey: 'R' asShortcut)
 				context: self);
@@ -279,11 +297,11 @@ PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
 	"Private - Package selection callback to update class list with those classes that belongs to aPackageOrNil"
 
 	aPackageOrNil
-		ifNotNil: [ : package | 
+		ifNotNil: [ : package |
 			"If selected item is the same as the one already selected, we unselect and clean selection"
-			package = oldSelectedPackage  
+			package = oldSelectedPackage
 				ifTrue: [ self resetAllSelections ]
-				ifFalse: [ 
+				ifFalse: [
 					| filteredItems |
 					filteredItems := package classes select: [ : c | self visitedClasses includes: c ].
 					classesListPresenter items: filteredItems asOrderedSet.
@@ -302,7 +320,7 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 	"Private - Class selection callback to update methods list with those methods that belongs to aClassOrNil"
 
 	aClassOrNil
-		ifNotNil: [ : class | 
+		ifNotNil: [ : class |
 			| filteredItems |.
 			filteredItems := class methods select: [ : c | self visitedMethods includes: c ].
 			methodsListPresenter items: filteredItems asOrderedSet ]

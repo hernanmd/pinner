@@ -1,3 +1,6 @@
+"
+Command to open a Dependency Browser on the selected package
+"
 Class {
 	#name : 'PinnerBrowseDependenciesCommand',
 	#superclass : 'PinnerPackageBrowseCommand',

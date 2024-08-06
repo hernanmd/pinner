@@ -1,3 +1,10 @@
+"
+This is the main Pinner Spec2 application class which:
+
+•	Contains a *collector*: An object that represents a repository of *visited objects*.
+•	Handles the application start up. See the `PinnerSpApplication >> #start` method.
+•	Creates a new entry for this application in the World menu.
+"
 Class {
 	#name : 'PinnerSpApplication',
 	#superclass : 'SpApplication',

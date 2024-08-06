@@ -1,3 +1,6 @@
+"
+Command to open a Browser on the selected package
+"
 Class {
 	#name : 'PinnerBrowsePackageCommand',
 	#superclass : 'PinnerPackageBrowseCommand',

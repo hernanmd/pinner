@@ -54,6 +54,8 @@ PinnerClyTestCase >> setUp [
 
 	| environment |
 	super setUp.
+	"Warning: Running tests should clean the history"
+	PinnerCollector reset.
 	environment := ClyNavigationEnvironment overSystemEnvironment: ClySystemEnvironment currentImage.
 	environment detachFromSystem "to ensure no subscriptions".
 
@@ -64,6 +66,13 @@ PinnerClyTestCase >> setUp [
 	pinner := PinnerCollector new
 		browser: browser;
 		yourself
+]
+
+{ #category : 'running' }
+PinnerClyTestCase >> tearDown [
+
+	PinnerCollector reset.
+	super tearDown.
 ]
 
 { #category : 'tests' }

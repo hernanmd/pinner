@@ -3,7 +3,7 @@ Command to clean all saved history in the Pinner.
 "
 Class {
 	#name : 'PinnerResetHistoryCommand',
-	#superclass : 'CmCommand',
+	#superclass : 'PinnerCommand',
 	#category : 'Pinner-UI-Commands',
 	#package : 'Pinner-UI',
 	#tag : 'Commands'
@@ -30,5 +30,6 @@ PinnerResetHistoryCommand class >> defaultName [
 { #category : 'executing' }
 PinnerResetHistoryCommand >> execute [
 
-	self context doResetHistory
+	(self confirm: 'Are you sure to remove all pinned history?')
+		ifTrue: [ self context doResetHistory ]
 ]

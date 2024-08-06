@@ -1,13 +1,22 @@
+"
+Abstract class to group package behavior.
+
+"
 Class {
 	#name : 'PinnerPackageBrowseCommand',
-	#superclass : 'CmCommand',
+	#superclass : 'PinnerCommand',
 	#category : 'Pinner-UI-Commands',
 	#package : 'Pinner-UI',
 	#tag : 'Commands'
 }
 
-{ #category : 'testing' }
-PinnerPackageBrowseCommand >> canBeExecuted [ 
+{ #category : 'as yet unclassified' }
+PinnerPackageBrowseCommand class >> order [
+	^ self subclassResponsibility
+]
 
-	^ self context hasSelectedPackage
+{ #category : 'testing' }
+PinnerPackageBrowseCommand >> canBeExecuted [
+
+	^ super canBeExecuted and: [ self context hasSelectedPackage ]
 ]

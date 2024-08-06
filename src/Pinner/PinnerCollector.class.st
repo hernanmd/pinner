@@ -25,23 +25,30 @@ Class {
 	#tag : 'Core'
 }
 
-{ #category : 'class initialization' }
-PinnerCollector class >> initialize [ 
+{ #category : 'accessing' }
+PinnerCollector class >> collectionClass [
 
-	self pinnedObjects: nil.
+	^ CTOrderedSet
 ]
 
 { #category : 'accessing' }
 PinnerCollector class >> pinnedObjects [
 
 	^ PinnedObjects
-		ifNil: [ PinnedObjects := CTOrderedSet new ]
+		ifNil: [ PinnedObjects := self collectionClass new ]
 ]
 
 { #category : 'accessing' }
 PinnerCollector class >> pinnedObjects: aCollection [
 
 	 PinnedObjects := aCollection
+]
+
+{ #category : 'class initialization' }
+PinnerCollector class >> reset [ 
+	<script>
+
+	self pinnedObjects: nil.
 ]
 
 { #category : 'accessing' }
@@ -61,6 +68,22 @@ PinnerCollector >> classes [
 	"Answer a <Collection> of recently visited classes"
 
 	^ self pinnedObjects select: [ : obj | obj isClass ]
+]
+
+{ #category : 'requirements' }
+PinnerCollector >> collectionClass [
+	"See class side comment"
+
+	^ self class collectionClass
+]
+
+{ #category : 'testing' }
+PinnerCollector >> hasPinnedHistory [
+	"Answer <true> if the receiver contains any history recorded"
+	
+	^ self pinnedObjects notEmpty
+
+	
 ]
 
 { #category : 'accessing' }
@@ -84,7 +107,7 @@ PinnerCollector >> packages [
 	^ self pinnedObjects select: [ : obj | obj isPackage ]
 ]
 
-{ #category : 'initialization' }
+{ #category : 'adding' }
 PinnerCollector >> pinObjects: aCollection [
 
 	self pinnedObjects addAll: aCollection
@@ -94,12 +117,6 @@ PinnerCollector >> pinObjects: aCollection [
 PinnerCollector >> pinnedObjects [
 
 	^ self class pinnedObjects
-]
-
-{ #category : 'adding' }
-PinnerCollector >> pinnedObjects: aCollection [ 
-
-	self class pinnedObjects: aCollection
 ]
 
 { #category : 'accessing' }
@@ -114,7 +131,14 @@ PinnerCollector >> presenter: anObject [
 	presenter := anObject
 ]
 
-{ #category : 'initialization' }
+{ #category : 'removing' }
+PinnerCollector >> resetHistory [ 
+	"Remove all pinned objects in the receiver"
+	
+	self class reset.
+]
+
+{ #category : 'actions' }
 PinnerCollector >> updatePresenter [
 
 	presenter

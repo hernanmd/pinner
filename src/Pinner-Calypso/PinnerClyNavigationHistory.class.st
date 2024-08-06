@@ -31,10 +31,12 @@ PinnerClyNavigationHistory >> historyFrom: aBrowserState [
 
 { #category : 'operations' }
 PinnerClyNavigationHistory >> recordState: aBrowserState [
+	"Private - It should be possible with something like:
+		
+		(aBrowserState systemScope environment queryCache associationsSelect: [ : q | q key class inheritsFrom: ClyTypedQuery ]) inspect.
+		
+	However it was difficult to debug, and for now we use a simpler implementation"
 
-	"(aBrowserState systemScope environment queryCache associationsSelect: [ : q | q key class inheritsFrom: ClyTypedQuery ]) inspect."
-	"('recordState: ' , (self historyFrom: aBrowserState) asString) traceCr."
-			
 	aBrowserState representsConcreteQuery ifFalse: [ ^self ].
 	waitingNewState ifFalse: [ ^self ].
 
