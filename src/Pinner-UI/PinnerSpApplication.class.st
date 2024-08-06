@@ -30,7 +30,7 @@ PinnerSpApplication class >> collectorClass: anObject [
 PinnerSpApplication class >> defaultCollectorClass [
 
 	^ self environment
-		at: #PinnerClyCollector
+		at: #PinnerCollector
 		ifAbsent: [ self error: 'Default history collector not available' ]
 ]
 
@@ -71,5 +71,9 @@ PinnerSpApplication >> collector: aPinnerCollector [
 PinnerSpApplication >> start [
 	" Private - See superimplementor's comment "
 
-	(PinnerSpMainPresenter newApplication: self model: self collector) open
+	| newPresenter |
+	newPresenter := PinnerSpMainPresenter newApplication: self model: self collector.
+	"self flag: #toDo"
+	self collector presenter: newPresenter.
+	newPresenter open
 ]

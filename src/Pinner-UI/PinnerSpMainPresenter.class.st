@@ -269,6 +269,12 @@ PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 ]
 
 { #category : 'callbacks' }
+PinnerSpMainPresenter >> updateClasses: aCollection [
+
+	classesListPresenter items: aCollection
+]
+
+{ #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
 	"Private - Package selection callback to update class list with those classes that belongs to aPackageOrNil"
 
@@ -286,6 +292,12 @@ PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
 ]
 
 { #category : 'callbacks' }
+PinnerSpMainPresenter >> updateMethods: aCollection [
+
+	methodsListPresenter items: aCollection
+]
+
+{ #category : 'callbacks' }
 PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 	"Private - Class selection callback to update methods list with those methods that belongs to aClassOrNil"
 
@@ -294,6 +306,12 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 			| filteredItems |.
 			filteredItems := class methods select: [ : c | self visitedMethods includes: c ].
 			methodsListPresenter items: filteredItems asOrderedSet ]
+]
+
+{ #category : 'callbacks' }
+PinnerSpMainPresenter >> updatePackages: aCollection [
+
+	packagesListPresenter items: aCollection
 ]
 
 { #category : 'accessing' }

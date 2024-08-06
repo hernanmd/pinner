@@ -61,7 +61,7 @@ PinnerClyTestCase >> setUp [
 	browser navigationEnvironment: environment.
 	browser plugins removeAll.
 
-	pinner := PinnerClyCollector new
+	pinner := PinnerCollector new
 		browser: browser;
 		yourself
 ]
