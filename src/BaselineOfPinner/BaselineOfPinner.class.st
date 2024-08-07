@@ -17,8 +17,8 @@ BaselineOfPinner >> baseline: spec [
 				package: 'Pinner'        with: [ spec requires: #(ContainersOrderedSet) ];
 				package: 'Pinner-Calypso' with: [ spec requires: #(Pinner) ];
 				package: 'Pinner-UI'     with: [ spec requires: #(Pinner) ];
-				package: 'Pinner-Tests'	with: [ spec requires: #(Pinner 'Pinner-UI');
-				package: 'Pinner-Tests-Calypso' with: [ spec requires: #('Pinner-Tests') ] ].
+				package: 'Pinner-Tests'	with: [ spec requires: #(Pinner 'Pinner-UI') ];
+				package: 'Pinner-Tests-Calypso' with: [ spec requires: #(#'Pinner-Tests') ].
 
 			spec 
 				group: 'Core' 						with: #('Pinner');
