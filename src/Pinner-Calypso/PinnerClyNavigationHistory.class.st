@@ -9,6 +9,12 @@ Class {
 	#tag : 'NavigationHistory'
 }
 
+{ #category : 'class initialization' }
+PinnerClyNavigationHistory class >> initialize [
+
+	ClyBrowserMorph navigationHistoryClass: self.
+]
+
 { #category : 'accessing' }
 PinnerClyNavigationHistory >> historyCollector [
 

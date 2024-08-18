@@ -372,7 +372,6 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updatePackages: aCollection [
 
-	self halt.
 	packagesListPresenter items: aCollection asOrderedSet;
 		updateList
 ]
