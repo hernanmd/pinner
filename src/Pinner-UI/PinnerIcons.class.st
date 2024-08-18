@@ -40,7 +40,7 @@ PinnerIcons class >> inspectionIcons [
 		  addColumn: (SpImageTableColumn title: 'Icon' evaluated: #value);
 		  addColumn: (SpStringTableColumn title: 'Name' evaluated: #key);
 		  items:
-			  ((self class selectorsInCategory: 'accessing - icons') sorted
+			  ((self class selectorsInProtocol: 'accessing - icons') sorted
 				   collect: [ :each | each -> (self perform: each) ]);
 		  yourself
 ]
@@ -54,7 +54,7 @@ PinnerIcons class >> resetIcons [
 { #category : 'accessing' }
 PinnerIcons >> iconNamed: aName ifAbsent: aBlock [
 	"Answer a <Form> representing an icon named aName. Execute aBlock if not found"
-	
+
 	(aName isNil or: [ (self class respondsTo: aName) not ])
 		ifTrue: [ ^ aBlock value ].
 

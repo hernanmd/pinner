@@ -42,9 +42,9 @@ PinnerSpApplication class >> defaultCollectorClass [
 ]
 
 { #category : 'private' }
-PinnerSpApplication class >> iconNamed: aSymbol [ 
-	
-	^ PinnerIcons new 
+PinnerSpApplication class >> iconNamed: aSymbol [
+
+	^ PinnerIcons new
 		iconNamed: aSymbol
 		ifAbsent: [ super iconNamed: #info  ]
 ]

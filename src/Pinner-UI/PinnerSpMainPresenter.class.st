@@ -28,9 +28,9 @@ PinnerSpMainPresenter >> classActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
 		beRoot;
-		register: ((SpBrowseClassCommand forSpecContext: self) 
+		register: ((SpBrowseClassCommand forSpecContext: self)
 			name: 'Browse class';
-			shortcutKey: $B; 
+			shortcutKey: $B;
 			yourself);
 		register: ((SpBrowseClassHierarchyCommand forSpecContext: self)
 			name: 'Browse class hierarchy';
@@ -136,7 +136,7 @@ PinnerSpMainPresenter >> doResetHistory [
 	"Private - Remove all pinned objects in the receiver"
 
 	| empty |
-	
+
 	empty := self collector collectionClass empty.
 	self collector resetHistory.
 	self
@@ -162,7 +162,7 @@ PinnerSpMainPresenter >> hasSelectedPackage [
 PinnerSpMainPresenter >> initializeClassesList [
 
 	| cmdGroup |
-	
+
 	cmdGroup := self classActionsCmdGroup.
 	classesListPresenter := self newList
 		beSingleSelection;
@@ -189,11 +189,11 @@ PinnerSpMainPresenter >> initializeFocus [
 PinnerSpMainPresenter >> initializeMethodsList [
 
 	| cmdGroup |
-	
+
 	cmdGroup := self methodActionsCmdGroup.
 	methodsListPresenter := self newList
 		beSingleSelection;
-		headerTitle: 'Methods';		
+		headerTitle: 'Methods';
 		display: [ : cm | self displayCompiledMethod: cm  ];
 		displayIcon: [ : cm | self iconNamed: cm systemIconName ];
 		contextMenu: [ cmdGroup asMenuPresenter ];
@@ -244,16 +244,16 @@ PinnerSpMainPresenter >> initializeWindow: aWindowPresenter [
 PinnerSpMainPresenter >> keybindsForFromContextMenu: aGroupElement [
 	| keybinds keybindsCommands |
 	keybinds := KMCategory new.
-	
+
 	keybindsCommands := aGroupElement allCommands select: [ :aCommand | aCommand hasShortcutKey ].
-	
+
 	keybindsCommands do: [ :aCommand | | action |
-		action := [ :aSelectedElement | aCommand execute ]. 
+		action := [ :aSelectedElement | aCommand execute ].
 		keybinds addKeymapEntry: (KMKeymap
 			shortcut: aCommand shortcutKey
 			action: action).
 		].
-	
+
 	^ keybinds
 ]
 
@@ -269,11 +269,11 @@ PinnerSpMainPresenter >> methodActionsCmdGroup [
 		register: ((SpBrowseImplementorsCommand forSpecContext: self)
 			name: 'Browse method implementors';
 			shortcutKey: $I;
-			yourself);		
+			yourself);
 		register: ((SpBrowseSendersCommand forSpecContext: self)
 			name: 'Browse method senders';
 			shortcutKey: $S;
-			yourself);		
+			yourself);
 		yourself
 ]
 
@@ -308,7 +308,7 @@ PinnerSpMainPresenter >> packageActionsCmdGroup [
 		register: ((PinnerResetHistoryCommand
 			forSpecWithIconNamed: #back
 			shortcutKey: $R)
-				name: 'Reset history';			
+				name: 'Reset history';
 				context: self);
 		yourself
 ]
@@ -332,7 +332,7 @@ PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClasses: aCollection [
 
-	classesListPresenter items: aCollection asOrderedSet 
+	classesListPresenter items: aCollection asOrderedSet
 ]
 
 { #category : 'callbacks' }
