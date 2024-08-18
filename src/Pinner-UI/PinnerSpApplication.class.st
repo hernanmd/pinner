@@ -42,13 +42,21 @@ PinnerSpApplication class >> defaultCollectorClass [
 ]
 
 { #category : 'private' }
+PinnerSpApplication class >> iconNamed: aSymbol [ 
+	
+	^ PinnerIcons new 
+		iconNamed: aSymbol
+		ifAbsent: [ super iconNamed: #info  ]
+]
+
+{ #category : 'private' }
 PinnerSpApplication class >> menuPinnerOn: aBuilder [
 	<worldMenu>
 
 	(aBuilder item: #Pinner)
 		parent: #Tools;
 		label: 'Pinner';
-		icon: (self iconNamed: #catalog);
+		icon: (self iconNamed: #browsing_16x16Icon);
 		action: [ PinnerSpApplication startApplication ];
 		help: 'Pinner';
 		order: 628
