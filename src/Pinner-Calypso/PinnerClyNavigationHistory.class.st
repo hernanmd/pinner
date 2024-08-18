@@ -1,3 +1,6 @@
+"
+Specializes Calypso navigation history to collect the visited items.
+"
 Class {
 	#name : 'PinnerClyNavigationHistory',
 	#superclass : 'ClyNavigationHistory',
@@ -25,7 +28,6 @@ PinnerClyNavigationHistory >> historyFrom: aBrowserState [
 		ifTrue: [ aBrowserState browserState ]
 		ifFalse: [ aBrowserState ].
 	selectedViewStates := realBrowserState viewStates select: [ : viewState | viewState selection hasSelectedItems ].
-
 	^ selectedViewStates flattened collect: [ : queryState | queryState selection actualObjects anyOne ]
 ]
 

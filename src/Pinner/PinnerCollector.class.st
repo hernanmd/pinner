@@ -28,7 +28,7 @@ Class {
 { #category : 'accessing' }
 PinnerCollector class >> collectionClass [
 
-	^ CTOrderedSet
+	^ Bag
 ]
 
 { #category : 'accessing' }
@@ -141,8 +141,10 @@ PinnerCollector >> resetHistory [
 { #category : 'actions' }
 PinnerCollector >> updatePresenter [
 
-	presenter
-		updatePackages: self packages;
-		updateClasses: self classes;
-		updateMethods: self methods
+	presenter ifNotNil: [ : p |
+		'updating...' traceCr.
+		p
+			updatePackages: self packages;
+			updateClasses: self classes;
+			updateMethods: self methods ]
 ]

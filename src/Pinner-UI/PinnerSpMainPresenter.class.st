@@ -24,13 +24,22 @@ Class {
 }
 
 { #category : 'private' }
-PinnerSpMainPresenter >> classActions [
+PinnerSpMainPresenter >> classActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
 		beRoot;
-		register: (SpBrowseClassCommand forSpecContext: self);
-		register: (SpBrowseClassHierarchyCommand forSpecContext: self);
-		register: (SpBrowseClassReferencesCommand forSpecContext: self);
+		register: ((SpBrowseClassCommand forSpecContext: self) 
+			name: 'Browse class';
+			shortcutKey: $B; 
+			yourself);
+		register: ((SpBrowseClassHierarchyCommand forSpecContext: self)
+			name: 'Browse class hierarchy';
+			shortcutKey: $H;
+			yourself);
+		register: ((SpBrowseClassReferencesCommand forSpecContext: self)
+			name: 'Browse class references';
+			shortcutKey: $R;
+			yourself);
 		yourself
 ]
 
@@ -52,6 +61,7 @@ PinnerSpMainPresenter >> defaultLayout [
 
 { #category : 'private' }
 PinnerSpMainPresenter >> displayCompiledMethod: cm [
+	"Answer a <String> representing a method item in the receiver's method list"
 
 	^ String streamContents: [ : stream |
 		stream
@@ -125,11 +135,14 @@ PinnerSpMainPresenter >> doBrowseSenders [
 PinnerSpMainPresenter >> doResetHistory [
 	"Private - Remove all pinned objects in the receiver"
 
+	| empty |
+	
+	empty := self collector collectionClass empty.
 	self collector resetHistory.
 	self
-		updatePackages: self collector collectionClass empty;
-		updateClasses: self collector collectionClass empty;
-		updateMethods: self collector collectionClass empty
+		updatePackages: empty;
+		updateClasses: empty;
+		updateMethods: empty
 ]
 
 { #category : 'testing' }
@@ -148,14 +161,18 @@ PinnerSpMainPresenter >> hasSelectedPackage [
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeClassesList [
 
+	| cmdGroup |
+	
+	cmdGroup := self classActionsCmdGroup.
 	classesListPresenter := self newList
 		beSingleSelection;
 		headerTitle: 'Classes';
 		displayIcon: [ : cls | self iconNamed: cls systemIconName ];
-		contextMenu: [ self classActions asMenuPresenter ];
+		contextMenu: [ self classActionsCmdGroup asMenuPresenter ];
 		whenSelectedItemChangedDo: [ : class | self updateMethodsList: class ];
-		"contextKeyBindings: self contextMenuKeyBindings;"
-		items: self collector classes;
+		contextMenu: [ cmdGroup asMenuPresenter ];
+		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
+		items: self collector classes asOrderedSet;
 		yourself
 ]
 
@@ -171,29 +188,34 @@ PinnerSpMainPresenter >> initializeFocus [
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeMethodsList [
 
+	| cmdGroup |
+	
+	cmdGroup := self methodActionsCmdGroup.
 	methodsListPresenter := self newList
 		beSingleSelection;
+		headerTitle: 'Methods';		
 		display: [ : cm | self displayCompiledMethod: cm  ];
 		displayIcon: [ : cm | self iconNamed: cm systemIconName ];
-		contextMenu: [ self methodActions asMenuPresenter ];
-		"contextKeyBindings: self contextMenuKeyBindings;"
-		headerTitle: 'Methods';
-		items: self collector methods;
+		contextMenu: [ cmdGroup asMenuPresenter ];
+		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
+		items: self collector methods asOrderedSet;
 		yourself
 ]
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializePackagesList [
 
+	| cmdGroup |
+	cmdGroup := self packageActionsCmdGroup.
 	packagesListPresenter := self newList
 		beSingleSelection;
 		headerTitle: 'Packages';
 		display: [ : pkg | pkg name ];
 		displayIcon: [ : pkg | self iconNamed: #package ];
-		contextMenu: [ self packageActions asMenuPresenter ];
-		"contextKeyBindings: self contextMenuKeyBindings;"
+		contextMenu: [ cmdGroup asMenuPresenter ];
+		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
 		whenSelectedItemChangedDo: [ : package | self updateClassesList: package ];
-		items: self collector packages;
+		items: self collector packages asOrderedSet;
 		yourself
 ]
 
@@ -204,16 +226,7 @@ PinnerSpMainPresenter >> initializePresenters [
 		initializeMethodsList;
 		initializeClassesList;
 		initializePackagesList;
-		initializeTiling;
 		initializeFocus
-]
-
-{ #category : 'initialization' }
-PinnerSpMainPresenter >> initializeTiling [
-	"Private - Try to tile the receiver if supported"
-
-	self whenVisibleChangedDo: [ : this | .
-		this widget tileRight ]
 ]
 
 { #category : 'initialization' }
@@ -223,17 +236,44 @@ PinnerSpMainPresenter >> initializeWindow: aWindowPresenter [
 	aWindowPresenter
 		title: 'Pinner';
 		windowIcon: (self iconNamed: #history);
+		resize: (200 @ 600) scaledByDisplayScaleFactor;
 		aboutText: 'Pinner: A recent browsing history viewer'
 ]
 
 { #category : 'private' }
-PinnerSpMainPresenter >> methodActions [
+PinnerSpMainPresenter >> keybindsForFromContextMenu: aGroupElement [
+	| keybinds keybindsCommands |
+	keybinds := KMCategory new.
+	
+	keybindsCommands := aGroupElement allCommands select: [ :aCommand | aCommand hasShortcutKey ].
+	
+	keybindsCommands do: [ :aCommand | | action |
+		action := [ :aSelectedElement | aCommand execute ]. 
+		keybinds addKeymapEntry: (KMKeymap
+			shortcut: aCommand shortcutKey
+			action: action).
+		].
+	
+	^ keybinds
+]
+
+{ #category : 'private' }
+PinnerSpMainPresenter >> methodActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
 		beRoot;
-		register: (SpBrowseMethodReferencesCommand forSpecContext: self);
-		register: (SpBrowseImplementorsCommand forSpecContext: self);
-		register: (SpBrowseSendersCommand forSpecContext: self);
+		register: ((SpBrowseMethodReferencesCommand forSpecContext: self)
+			name: 'Browse method references';
+			shortcutKey: $M;
+			yourself);
+		register: ((SpBrowseImplementorsCommand forSpecContext: self)
+			name: 'Browse method implementors';
+			shortcutKey: $I;
+			yourself);		
+		register: ((SpBrowseSendersCommand forSpecContext: self)
+			name: 'Browse method senders';
+			shortcutKey: $S;
+			yourself);		
 		yourself
 ]
 
@@ -243,29 +283,32 @@ PinnerSpMainPresenter >> open [
 	super open.
 	self withWindowDo: [ : w |
 		"Tiling should not change the configured width"
-		w adapter widget width: 200 scaledByDisplayScaleFactor.
-		w adapter widget tileRight; toggleStickiness ]
+		w adapter widget tileRight.
+		w resize: (200 @ 800) scaledByDisplayScaleFactor ]
 ]
 
 { #category : 'private' }
-PinnerSpMainPresenter >> packageActions [
+PinnerSpMainPresenter >> packageActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
 		beRoot;
 		register: ((CmCommandGroup named: 'Browsing commands') asSpecGroup
 			register: ((PinnerBrowseDependenciesCommand
 				forSpecWithIconNamed: #smallHierarchyBrowser
-				shortcutKey: 'D' asShortcut)
+				shortcutKey: $D)
+					name: 'Browse package dependencies';
 					context: self);
 			register: ((PinnerBrowsePackageCommand
 				forSpecWithIconNamed: #smallHierarchyBrowser
-				shortcutKey: 'B' asShortcut)
+				shortcutKey: $B)
+					name: 'Browse package';
 					context: self);
 			beDisplayedAsGroup;
 			yourself);
 		register: ((PinnerResetHistoryCommand
 			forSpecWithIconNamed: #back
-			shortcutKey: 'R' asShortcut)
+			shortcutKey: $R)
+				name: 'Reset history';			
 				context: self);
 		yourself
 ]
@@ -289,7 +332,7 @@ PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClasses: aCollection [
 
-	classesListPresenter items: aCollection
+	classesListPresenter items: aCollection asOrderedSet 
 ]
 
 { #category : 'callbacks' }
@@ -312,7 +355,7 @@ PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateMethods: aCollection [
 
-	methodsListPresenter items: aCollection
+	methodsListPresenter items: aCollection asOrderedSet
 ]
 
 { #category : 'callbacks' }
@@ -329,7 +372,9 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updatePackages: aCollection [
 
-	packagesListPresenter items: aCollection
+	self halt.
+	packagesListPresenter items: aCollection asOrderedSet;
+		updateList
 ]
 
 { #category : 'accessing' }
