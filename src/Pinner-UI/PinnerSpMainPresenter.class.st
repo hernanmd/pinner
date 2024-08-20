@@ -410,9 +410,9 @@ PinnerSpMainPresenter >> resetAllSelections [
 	"Private - It seems to be a bug in Spec2 because list selection keeps selected regardless of sending:
 	resetListSelection; refresh; updateList "
 
-	packagesListPresenter items: self visitedPackages.
-	classesListPresenter items: self visitedClasses.
-	methodsListPresenter items: self visitedMethods
+	packagesListPresenter items: self visitedPackages asOrderedSet.
+	classesListPresenter items: self visitedClasses asOrderedSet.
+	methodsListPresenter items: self visitedMethods asOrderedSet
 ]
 
 { #category : 'accessing - model' }

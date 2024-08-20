@@ -127,9 +127,8 @@ PinnerCollector >> presenter [
 ]
 
 { #category : 'accessing' }
-PinnerCollector >> presenter: anObject [
-
-	presenter := anObject
+PinnerCollector >> presenter: aPinnerSpMainPresenter [ 
+	presenter := aPinnerSpMainPresenter
 ]
 
 { #category : 'removing' }
@@ -142,7 +141,6 @@ PinnerCollector >> resetHistory [
 { #category : 'actions' }
 PinnerCollector >> updatePresenter [
 
-	self flag: #toReview.
 	presenter ifNotNil: [ : p |
 		p
 			updatePackages: self packages;
