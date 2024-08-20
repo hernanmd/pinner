@@ -86,7 +86,7 @@ PinnerCollector >> browser: anObject [
 
 { #category : 'accessing' }
 PinnerCollector >> classes [
-	"Answer a <Collection> of recently visited classes"
+	"Answer a <Collection> of <PinnedObject> representing recently visited classes"
 
 	^ self pinnedObjects select: [ : obj | obj isClass ]
 ]
@@ -116,14 +116,14 @@ PinnerCollector >> methods [
 
 { #category : 'accessing' }
 PinnerCollector >> packageTags [
-	"Answer a <Collection> of recently visited packages"
+	"Answer a <Collection> of <PinnedObject> representing representing recently visited package tags"
 
 	^ self pinnedObjects select: [ : obj | obj class == PackageTag ]
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> packages [
-	"Answer a <Collection> of recently visited packages"
+	"Answer a <Collection> of <PinnedObject> representing recently visited packages"
 
 	^ self pinnedObjects select: [ : obj | obj isPackage ]
 ]

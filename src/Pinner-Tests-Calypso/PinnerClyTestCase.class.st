@@ -51,6 +51,7 @@ PinnerClyTestCase >> openBrowserAndSelectPackagesAndTag [
 
 { #category : 'running' }
 PinnerClyTestCase >> setUp [
+	"Note that for Calypso, the current selection is not part of the navigation history"
 
 	| environment |
 	super setUp.
@@ -63,7 +64,7 @@ PinnerClyTestCase >> setUp [
 	browser navigationEnvironment: environment.
 	browser plugins removeAll.
 
-	pinner := PinnerCollector new
+	pinner := PinnerCollector uniqueInstance
 		browser: browser;
 		yourself
 ]
@@ -79,9 +80,8 @@ PinnerClyTestCase >> tearDown [
 PinnerClyTestCase >> testClassesSelection [
 
 	self openBrowserAndSelectClasses.
-	"Note that for Calypso, the current selection is not part of the navigation history"
 	self
-		assertCollection: pinner classes
+		assertCollection: (pinner classes collect: #reference)
 		hasSameElements: self classesToBeSelected allButLast
 ]
 
@@ -89,30 +89,16 @@ PinnerClyTestCase >> testClassesSelection [
 PinnerClyTestCase >> testMethodsSelection [
 
 	self openBrowserAndSelectMethods.
-	"Note that for Calypso, the current selection is not part of the navigation history"
 	self
-		assertCollection: pinner methods
+		assertCollection: (pinner methods collect: #reference)
 		hasSameElements: self methodsToBeSelected allButLast
-]
-
-{ #category : 'tests' }
-PinnerClyTestCase >> testPackagesAndTagSelection [
-
-	self skip.
-	self flag: #toDo.
-	self openBrowserAndSelectPackagesAndTag.
-	"Note that for Calypso, the current selection is not part of the navigation history"
-	self
-		assertCollection: pinner packageTags
-		hasSameElements: self packagesWithTagToBeSelected allButLast
 ]
 
 { #category : 'tests' }
 PinnerClyTestCase >> testPackagesSelection [
 
 	self openBrowserAndSelectPackages.
-	"Note that for Calypso, the current selection is not part of the navigation history"
 	self
-		assertCollection: pinner packages
+		assertCollection: (pinner packages collect: #reference)
 		hasSameElements: self packagesToBeSelected allButLast
 ]
