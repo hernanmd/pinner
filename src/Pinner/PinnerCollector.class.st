@@ -88,9 +88,9 @@ PinnerCollector >> hasPinnedHistory [
 
 { #category : 'accessing' }
 PinnerCollector >> methods [
-	"Answer a <Collection> of recently visited methods"
+	"Answer a <Collection> of <PinnedObject> recently visited methods"
 
-	^ self pinnedObjects select: [ : obj | obj isCompiledMethod ]
+	^ self pinnedObjects select: [ : obj | obj isMethod ]
 ]
 
 { #category : 'accessing' }
@@ -142,8 +142,8 @@ PinnerCollector >> resetHistory [
 { #category : 'actions' }
 PinnerCollector >> updatePresenter [
 
+	self flag: #toReview.
 	presenter ifNotNil: [ : p |
-		'updating...' traceCr.
 		p
 			updatePackages: self packages;
 			updateClasses: self classes;

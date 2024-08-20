@@ -27,10 +27,19 @@ PinnedObject >> = aPinnedObject [
 
 	self == aPinnedObject 
 		ifTrue: [ ^ true ].
+	self class = aPinnedObject class
+		ifFalse: [ ^ false ].
 	self referenceClass = aPinnedObject referenceClass
 		ifFalse: [ ^ false ].
 	^ self referenceName = aPinnedObject referenceName
 
+]
+
+{ #category : 'accessing' }
+PinnedObject >> classes [
+	"If the receiver represents a <Package>, answer a <Collection> of contained classes"
+	
+	^ self reference classes
 ]
 
 { #category : 'comparing' }
@@ -58,6 +67,37 @@ PinnedObject >> isPackage [
 ]
 
 { #category : 'accessing' }
+PinnedObject >> methods [
+	"The reference is a <Class>. Answer a <Collection> of reference contained methods"
+
+	^ self reference methods 
+]
+
+{ #category : 'comparing' }
+PinnedObject >> name [
+
+	^ self reference name
+]
+
+{ #category : 'accessing' }
+PinnedObject >> package [
+	"Answer the receiver's reference <Package>"
+	
+	^ self reference package
+]
+
+{ #category : 'printing' }
+PinnedObject >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream 
+		space;
+		<< '[';
+		<< self referenceType;
+		<< ']'
+]
+
+{ #category : 'accessing' }
 PinnedObject >> reference [
 
 	^ reference
@@ -80,6 +120,24 @@ PinnedObject >> referenceName [
 	"Answer a <String> representation of the receiver"
 	
 	^ self reference name
+]
+
+{ #category : 'accessing' }
+PinnedObject >> referenceType [
+
+	^ self isClass
+		ifTrue: [ 'class' ]
+		ifFalse: [ 
+			self isPackage
+				ifTrue: [ 'package' ]
+				ifFalse: [ 'method'] ]
+]
+
+{ #category : 'accessing' }
+PinnedObject >> selector [
+	"Reference is a <CompiledMethod>. Answer a <Symbol> representing its selector"
+	
+	^ self reference selector
 ]
 
 { #category : 'accessing' }

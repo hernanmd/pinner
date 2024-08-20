@@ -73,7 +73,7 @@ PinnerSpMainPresenter >> displayCompiledMethod: cm [
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseClass [
 
-	self systemNavigation browse: classesListPresenter selectedItem
+	self systemNavigation browse: classesListPresenter selectedItem reference
 ]
 
 { #category : 'actions' }
@@ -81,7 +81,7 @@ PinnerSpMainPresenter >> doBrowseClassReferences [
 
 	| result classOrTrait |
 
-	result := classesListPresenter selectedItem.
+	result := classesListPresenter selectedItem reference.
 	(result isClass or: [ result isTrait ])
 		ifFalse: [ result := result class ].
 
@@ -94,32 +94,38 @@ PinnerSpMainPresenter >> doBrowseClassReferences [
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseHierarchy [
 
-	self systemNavigation browseHierarchy: classesListPresenter selectedItem
+	self systemNavigation browseHierarchy: classesListPresenter selectedItem reference
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseImplementors [
 
-	self systemNavigation browseAllImplementorsOf: methodsListPresenter selectedItem selector
+	| realSelection |
+	
+	realSelection := methodsListPresenter selectedItem reference.
+	self systemNavigation browseAllImplementorsOf: realSelection selector
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseMethodReferences [
 
-	self systemNavigation browseAllSendersOrUsersOf: methodsListPresenter selectedItem selector
+	| realSelection |
+	
+	realSelection := methodsListPresenter selectedItem reference.
+	self systemNavigation browseAllSendersOrUsersOf: realSelection selector
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowsePackage [
 
-	self systemNavigation browse: packagesListPresenter selectedItem
+	self systemNavigation browse: packagesListPresenter selectedItem reference
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowsePackageDependencies [
 
 	| analyzedPackage presenter |
-	analyzedPackage := DADependencyChecker new daPackageFor: packagesListPresenter selectedItem name.
+	analyzedPackage := DADependencyChecker new daPackageFor: packagesListPresenter selectedItem referenceName.
 	presenter := DATabPackageDependenciesPresenter on: analyzedPackage.
 	presenter open.
 	presenter withWindowDo: [ : w | w title: 'Package Dependencies' ]
@@ -128,7 +134,10 @@ PinnerSpMainPresenter >> doBrowsePackageDependencies [
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseSenders [
 
-	self systemNavigation browseAllSendersOf: methodsListPresenter selectedItem selector
+	| realSelection |
+	
+	realSelection := methodsListPresenter selectedItem reference.
+	self systemNavigation browseAllSendersOf: realSelection selector
 ]
 
 { #category : 'actions' }
@@ -199,7 +208,7 @@ PinnerSpMainPresenter >> initializeClassesList [
 		whenSelectedItemChangedDo: [ : class | self updateMethodsList: class ];
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
-		items: self visitedClasses asOrderedCollection;
+		items: self visitedClasses asOrderedSet;
 		yourself
 ]
 
@@ -217,7 +226,7 @@ PinnerSpMainPresenter >> initializeMethodListNameColumn [
 
 	^ (SpStringTableColumn
 		  title: 'Method'
-		  evaluated: [ : mth | self displayCompiledMethod: mth ])
+		  evaluated: [ : pinnedMethod | self displayCompiledMethod: pinnedMethod reference ])
 				beSortable;
 				displayBold;
 				sortFunction: [ : m1 : m2 | m1 selector threeWayCompareTo: m2 selector ];
@@ -241,7 +250,7 @@ PinnerSpMainPresenter >> initializeMethodsList [
 		addColumn: self initializeMethodListNameColumn;
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
-		items: self visitedMethods asOrderedCollection;
+		items: self visitedMethods asOrderedSet;
 		yourself
 ]
 
@@ -298,7 +307,7 @@ PinnerSpMainPresenter >> initializePackagesList [
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
 		whenSelectedItemChangedDo: [ : package | self updateClassesList: package ];
-		items: self collector packages asOrderedSet;
+		items: self visitedPackages asOrderedSet;
 		yourself
 ]
 
@@ -429,7 +438,7 @@ PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
 				ifTrue: [ self resetAllSelections ]
 				ifFalse: [
 					| filteredItems |
-					filteredItems := package classes select: [ : c | self visitedClasses includes: c ].
+					filteredItems := self visitedClasses select: [ : pinnedClass | pinnedClass package = aPackageOrNil reference ].
 					classesListPresenter items: filteredItems asOrderedSet.
 					methodsListPresenter items: Array empty.
 					oldSelectedPackage := package ] ]
@@ -447,8 +456,8 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 
 	aClassOrNil
 		ifNotNil: [ : class |
-			| filteredItems |.
-			filteredItems := class methods select: [ : c | self visitedMethods includes: c ].
+			| filteredItems |
+			filteredItems := self visitedMethods select: [ : pinnedMethod | pinnedMethod reference methodClass = aClassOrNil reference ].
 			methodsListPresenter items: filteredItems asOrderedSet ]
 ]
 
@@ -466,6 +475,7 @@ PinnerSpMainPresenter >> visitedClasses [
 
 { #category : 'accessing' }
 PinnerSpMainPresenter >> visitedMethods [
+	"Answer a <Collection> of <PinnedObject> recently visited methods"
 
 	^ self collector methods
 ]
