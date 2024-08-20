@@ -67,7 +67,7 @@ PinnerSpApplication class >> startApplication [
 	<script>
 
 	PinnerSpApplication new
-		collector: self collectorClass new;
+		collector: self collectorClass uniqueInstance;
 		start
 ]
 

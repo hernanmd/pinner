@@ -18,7 +18,8 @@ Class {
 		'presenter'
 	],
 	#classVars : [
-		'PinnedObjects'
+		'PinnedObjects',
+		'UniqueInstance'
 	],
 	#category : 'Pinner-Core',
 	#package : 'Pinner',
@@ -29,6 +30,19 @@ Class {
 PinnerCollector class >> collectionClass [
 
 	^ Bag
+]
+
+{ #category : 'class initialization' }
+PinnerCollector class >> createInstance [
+
+	^ self basicNew
+]
+
+{ #category : 'instance creation' }
+PinnerCollector class >> new [
+
+	^ self error: 'This is a singleton implementation, so you are not allowed to create instances yourself. 
+Use #uniqueInstance to access the instance.'
 ]
 
 { #category : 'accessing' }
@@ -49,6 +63,13 @@ PinnerCollector class >> reset [
 	<script>
 
 	self pinnedObjects: nil.
+]
+
+{ #category : 'class initialization' }
+PinnerCollector class >> uniqueInstance [
+
+	^ UniqueInstance 
+		ifNil: [ UniqueInstance := self createInstance ]
 ]
 
 { #category : 'accessing' }
