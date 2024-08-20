@@ -110,7 +110,8 @@ PinnerCollector >> packages [
 { #category : 'adding' }
 PinnerCollector >> pinObjects: aCollection [
 
-	self pinnedObjects addAll: aCollection
+	self pinnedObjects addAll: 
+		(aCollection collect: [ : stObject | PinnedObject on: stObject ])
 ]
 
 { #category : 'accessing' }

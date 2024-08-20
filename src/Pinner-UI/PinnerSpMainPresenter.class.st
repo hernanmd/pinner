@@ -159,20 +159,47 @@ PinnerSpMainPresenter >> hasSelectedPackage [
 ]
 
 { #category : 'initialization' }
+PinnerSpMainPresenter >> initializeClassListCountColumn [
+
+	^ (SpStringTableColumn
+		  title: '#'
+		  evaluated: [ : cls | (self visitedClasses occurrencesOf: cls) asString ])
+				width: 20;
+				sortFunction: [ : m1 : m2 | (self visitedClasses occurrencesOf: m1) threeWayCompareTo: (self visitedClasses occurrencesOf: m2) ];
+				yourself
+]
+
+{ #category : 'initialization' }
+PinnerSpMainPresenter >> initializeClassListNameColumn [
+
+	^ (SpStringTableColumn
+			title: 'Class'
+			evaluated: [ : cls | cls name ])
+				sortFunction: [ : c1 : c2 | c1 name threeWayCompareTo: c2 name ];
+				yourself
+
+]
+
+{ #category : 'initialization' }
 PinnerSpMainPresenter >> initializeClassesList [
 
 	| cmdGroup |
 
 	cmdGroup := self classActionsCmdGroup.
-	classesListPresenter := self newList
+
+	classesListPresenter := self newTable 
 		beSingleSelection;
-		headerTitle: 'Classes';
-		displayIcon: [ : cls | self iconNamed: cls systemIconName ];
+		addColumn: 
+			((SpImageTableColumn evaluated: [ :cls | self iconNamed: cls systemIconName ])
+				width: 20;
+				yourself);
+		addColumn: self initializeClassListCountColumn;
+		addColumn: self initializeClassListNameColumn;
 		contextMenu: [ self classActionsCmdGroup asMenuPresenter ];
 		whenSelectedItemChangedDo: [ : class | self updateMethodsList: class ];
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
-		items: self collector classes asOrderedSet;
+		items: self visitedClasses asOrderedCollection;
 		yourself
 ]
 
@@ -186,20 +213,73 @@ PinnerSpMainPresenter >> initializeFocus [
 ]
 
 { #category : 'initialization' }
+PinnerSpMainPresenter >> initializeMethodListNameColumn [
+
+	^ (SpStringTableColumn
+		  title: 'Method'
+		  evaluated: [ : mth | self displayCompiledMethod: mth ])
+				beSortable;
+				displayBold;
+				sortFunction: [ : m1 : m2 | m1 selector threeWayCompareTo: m2 selector ];
+				yourself
+]
+
+{ #category : 'initialization' }
 PinnerSpMainPresenter >> initializeMethodsList [
 
 	| cmdGroup |
 
 	cmdGroup := self methodActionsCmdGroup.
-	methodsListPresenter := self newList
+
+	methodsListPresenter := self newTable
 		beSingleSelection;
-		headerTitle: 'Methods';
-		display: [ : cm | self displayCompiledMethod: cm  ];
-		displayIcon: [ : cm | self iconNamed: cm systemIconName ];
+		addColumn: 
+			((SpImageTableColumn evaluated: [ : mth | self iconNamed: mth systemIconName ])
+				width: 20;
+				yourself);
+		addColumn: self initializeMethodsListCountColumn;
+		addColumn: self initializeMethodListNameColumn;
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
-		items: self collector methods asOrderedSet;
+		items: self visitedMethods asOrderedCollection;
 		yourself
+]
+
+{ #category : 'initialization' }
+PinnerSpMainPresenter >> initializeMethodsListCountColumn [
+
+	^ (SpStringTableColumn
+		  title: '#'
+		  evaluated: [ : mth | (self visitedMethods occurrencesOf: mth) asString ])
+			displayBold;
+			beSortable;
+			sortFunction: [ : m1 : m2 | (self visitedMethods occurrencesOf: m1) threeWayCompareTo: (self visitedMethods occurrencesOf: m2) ];					
+			width: 20;
+			yourself
+
+]
+
+{ #category : 'initialization' }
+PinnerSpMainPresenter >> initializePackageListCountColumn [
+
+	^ (SpStringTableColumn
+		  title: '#'
+		  evaluated: [ : pkg | (self visitedPackages occurrencesOf: pkg) asString ])
+				width: 20;
+				sortFunction: [ : p1 : p2 | (self visitedPackages occurrencesOf: p1) threeWayCompareTo: (self visitedPackages occurrencesOf: p2) ];
+				yourself
+]
+
+{ #category : 'initialization' }
+PinnerSpMainPresenter >> initializePackageListNameColumn [
+
+	^ (SpStringTableColumn
+		  title: 'Package'
+		  evaluated: [ : pkg | pkg name ])
+				beSortable;
+				displayBold;
+				sortFunction: [ : p1 : p2 | p1 name threeWayCompareTo: p2 name ];
+				yourself
 ]
 
 { #category : 'initialization' }
@@ -207,11 +287,14 @@ PinnerSpMainPresenter >> initializePackagesList [
 
 	| cmdGroup |
 	cmdGroup := self packageActionsCmdGroup.
-	packagesListPresenter := self newList
+	packagesListPresenter := self newTable
 		beSingleSelection;
-		headerTitle: 'Packages';
-		display: [ : pkg | pkg name ];
-		displayIcon: [ : pkg | self iconNamed: #package ];
+		addColumn: 
+			((SpImageTableColumn evaluated: [ : mth | self iconNamed: #package ])
+				width: 20;
+				yourself);
+		addColumn: self initializePackageListCountColumn;
+		addColumn: self initializePackageListNameColumn;		
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
 		whenSelectedItemChangedDo: [ : package | self updateClassesList: package ];
@@ -372,8 +455,7 @@ PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updatePackages: aCollection [
 
-	packagesListPresenter items: aCollection asOrderedSet;
-		updateList
+	packagesListPresenter items: aCollection asOrderedSet
 ]
 
 { #category : 'accessing' }
