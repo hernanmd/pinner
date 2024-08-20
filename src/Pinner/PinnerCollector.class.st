@@ -109,9 +109,9 @@ PinnerCollector >> packages [
 
 { #category : 'adding' }
 PinnerCollector >> pinObjects: aCollection [
+	"Add visited Smalltalk objects in aCollection to the receiver"
 
-	self pinnedObjects addAll: 
-		(aCollection collect: [ : stObject | PinnedObject on: stObject ])
+	self pinnedObjects addAll: (self safePinningOf: aCollection)
 ]
 
 { #category : 'accessing' }
@@ -136,6 +136,15 @@ PinnerCollector >> resetHistory [
 	"Remove all pinned objects in the receiver"
 	
 	self class reset.
+]
+
+{ #category : 'private' }
+PinnerCollector >> safePinningOf: aCollection [ 
+	"Answer objects 'safe' to be pinned, i.e. discard obsolete classes"
+	
+	^ (aCollection 
+		reject: [ : stObject | stObject isClass and: [ stObject isObsolete ] ]
+		thenCollect: [ : stObject | PinnedObject on: stObject ])
 ]
 
 { #category : 'actions' }
