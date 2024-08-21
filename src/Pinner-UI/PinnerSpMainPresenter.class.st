@@ -328,7 +328,6 @@ PinnerSpMainPresenter >> initializeWindow: aWindowPresenter [
 	aWindowPresenter
 		title: 'Pinner';
 		windowIcon: (self iconNamed: #history);
-		resize: (200 @ 600) scaledByDisplayScaleFactor;
 		aboutText: 'Pinner: A recent browsing history viewer'
 ]
 
@@ -376,7 +375,7 @@ PinnerSpMainPresenter >> open [
 	self withWindowDo: [ : w |
 		"Tiling should not change the configured width"
 		w adapter widget tileRight.
-		w resize: (200 @ 800) scaledByDisplayScaleFactor ]
+		w resize: (350 @ 600) scaledByDisplayScaleFactor ]
 ]
 
 { #category : 'private' }
