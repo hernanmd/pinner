@@ -2,7 +2,7 @@
 Command to clean all saved history in the Pinner.
 "
 Class {
-	#name : 'PinnerResetHistoryCommand',
+	#name : 'PinnerResetAllHistoryCommand',
 	#superclass : 'PinnerCommand',
 	#category : 'Pinner-UI-Commands',
 	#package : 'Pinner-UI',
@@ -10,26 +10,26 @@ Class {
 }
 
 { #category : 'default' }
-PinnerResetHistoryCommand class >> defaultDescription [
+PinnerResetAllHistoryCommand class >> defaultDescription [
 
 	^ 'Clean the visit history'
 ]
 
 { #category : 'initialization' }
-PinnerResetHistoryCommand class >> defaultIconName [
+PinnerResetAllHistoryCommand class >> defaultIconName [
 
 	^ #back
 ]
 
 { #category : 'default' }
-PinnerResetHistoryCommand class >> defaultName [
+PinnerResetAllHistoryCommand class >> defaultName [
 
 	^ 'Reset all history'
 ]
 
 { #category : 'executing' }
-PinnerResetHistoryCommand >> execute [
+PinnerResetAllHistoryCommand >> execute [
 
 	(self confirm: 'Are you sure to remove all pinned history?')
-		ifTrue: [ self context doResetHistory ]
+		ifTrue: [ self context doResetAllHistory ]
 ]

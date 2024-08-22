@@ -142,6 +142,12 @@ PinnerCollector >> pinnedObjects [
 ]
 
 { #category : 'accessing' }
+PinnerCollector >> pinnedObjects: aCollection [
+
+	self class pinnedObjects: aCollection
+]
+
+{ #category : 'accessing' }
 PinnerCollector >> presenter [
 
 	^ presenter
@@ -153,10 +159,32 @@ PinnerCollector >> presenter: aPinnerSpMainPresenter [
 ]
 
 { #category : 'removing' }
+PinnerCollector >> resetClassesHistory [ 
+	"Remove all pinned classes in the receiver"
+	
+	self pinnedObjects: (self pinnedObjects removeAll: self classes) 
+]
+
+{ #category : 'removing' }
 PinnerCollector >> resetHistory [ 
 	"Remove all pinned objects in the receiver"
 	
 	self class reset.
+]
+
+{ #category : 'removing' }
+PinnerCollector >> resetMethodsHistory [ 
+	"Remove all pinned methods in the receiver"
+	
+	self pinnedObjects: (self pinnedObjects removeAll: self methods) 
+
+]
+
+{ #category : 'removing' }
+PinnerCollector >> resetPackagesHistory [ 
+	"Remove all pinned packages in the receiver"
+	
+	self pinnedObjects: (self pinnedObjects removeAll: self packages) 
 ]
 
 { #category : 'private' }

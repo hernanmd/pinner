@@ -27,20 +27,36 @@ Class {
 PinnerSpMainPresenter >> classActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
-		beRoot;
-		register: ((SpBrowseClassCommand forSpecContext: self)
-			name: 'Browse class';
-			shortcutKey: $B;
-			yourself);
-		register: ((SpBrowseClassHierarchyCommand forSpecContext: self)
-			name: 'Browse class hierarchy';
-			shortcutKey: $H;
-			yourself);
-		register: ((SpBrowseClassReferencesCommand forSpecContext: self)
-			name: 'Browse class references';
-			shortcutKey: $R;
-			yourself);
-		yourself
+		  beRoot;
+		  register:
+			  ((CmCommandGroup named: 'Browsing class commands') asSpecGroup
+				   register: ((SpBrowseClassCommand forSpecContext: self)
+						    name: 'Browse class';
+						    shortcutKey: $B;
+						    yourself);
+				   register:
+					   ((SpBrowseClassHierarchyCommand forSpecContext: self)
+						    name: 'Browse class hierarchy';
+						    shortcutKey: $H;
+						    yourself);
+				   register:
+					   ((SpBrowseClassReferencesCommand forSpecContext: self)
+						    name: 'Browse class references';
+						    shortcutKey: $R;
+						    yourself);
+					beDisplayedAsGroup;
+					yourself);
+		  register: ((PinnerResetClassesHistoryCommand
+				    forSpecWithIconNamed: #back
+				    shortcutKey: $X)
+				   name: 'Reset classes history';
+				   context: self);
+		  register: ((PinnerInspectClassCommand
+				    forSpecWithIconNamed: #smallInspectIt
+				    shortcutKey: $I)
+				   name: 'Inspect';
+				   context: self);
+		  yourself
 ]
 
 { #category : 'accessing' }
@@ -73,7 +89,7 @@ PinnerSpMainPresenter >> displayCompiledMethod: cm [
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseClass [
 
-	self systemNavigation browse: classesListPresenter selectedItem reference
+	self systemNavigation browse: self selectedClass reference
 ]
 
 { #category : 'actions' }
@@ -81,7 +97,7 @@ PinnerSpMainPresenter >> doBrowseClassReferences [
 
 	| result classOrTrait |
 
-	result := classesListPresenter selectedItem reference.
+	result := self selectedClass reference.
 	(result isClass or: [ result isTrait ])
 		ifFalse: [ result := result class ].
 
@@ -102,7 +118,7 @@ PinnerSpMainPresenter >> doBrowseImplementors [
 
 	| realSelection |
 	
-	realSelection := methodsListPresenter selectedItem reference.
+	realSelection := self selectedMethod reference.
 	self systemNavigation browseAllImplementorsOf: realSelection selector
 ]
 
@@ -111,7 +127,7 @@ PinnerSpMainPresenter >> doBrowseMethodReferences [
 
 	| realSelection |
 	
-	realSelection := methodsListPresenter selectedItem reference.
+	realSelection := self selectedMethod reference.
 	self systemNavigation browseAllSendersOrUsersOf: realSelection selector
 ]
 
@@ -136,12 +152,12 @@ PinnerSpMainPresenter >> doBrowseSenders [
 
 	| realSelection |
 	
-	realSelection := methodsListPresenter selectedItem reference.
+	realSelection := self selectedMethod reference.
 	self systemNavigation browseAllSendersOf: realSelection selector
 ]
 
-{ #category : 'actions' }
-PinnerSpMainPresenter >> doResetHistory [
+{ #category : 'actions - reset' }
+PinnerSpMainPresenter >> doResetAllHistory [
 	"Private - Remove all pinned objects in the receiver"
 
 	| empty |
@@ -152,6 +168,39 @@ PinnerSpMainPresenter >> doResetHistory [
 		updatePackages: empty;
 		updateClasses: empty;
 		updateMethods: empty
+]
+
+{ #category : 'actions - reset' }
+PinnerSpMainPresenter >> doResetClassesHistory [
+	"Private - Remove all pinned classes in the receiver"
+
+	| empty |
+
+	empty := self collector collectionClass empty.
+	self collector resetClassesHistory.
+	self updateClasses: empty.
+]
+
+{ #category : 'actions - reset' }
+PinnerSpMainPresenter >> doResetMethodsHistory [
+	"Private - Remove all pinned methods in the receiver"
+
+	| empty |
+
+	empty := self collector collectionClass empty.
+	self collector resetMethodsHistory.
+	self updateMethods: empty.
+]
+
+{ #category : 'actions - reset' }
+PinnerSpMainPresenter >> doResetPackagesHistory [
+	"Private - Remove all pinned packages in the receiver"
+
+	| empty |
+
+	empty := self collector collectionClass empty.
+	self collector resetPackagesHistory.
+	self updatePackages: empty.
 ]
 
 { #category : 'testing' }
@@ -352,20 +401,35 @@ PinnerSpMainPresenter >> keybindsForFromContextMenu: aGroupElement [
 PinnerSpMainPresenter >> methodActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
-		beRoot;
-		register: ((SpBrowseMethodReferencesCommand forSpecContext: self)
-			name: 'Browse method references';
-			shortcutKey: $M;
-			yourself);
-		register: ((SpBrowseImplementorsCommand forSpecContext: self)
-			name: 'Browse method implementors';
-			shortcutKey: $I;
-			yourself);
-		register: ((SpBrowseSendersCommand forSpecContext: self)
-			name: 'Browse method senders';
-			shortcutKey: $S;
-			yourself);
-		yourself
+		  beRoot;
+		  register:
+			  ((CmCommandGroup named: 'Browsing class commands') asSpecGroup
+				   register:
+					   ((SpBrowseMethodReferencesCommand forSpecContext: self)
+						    name: 'Browse method references';
+						    shortcutKey: $M;
+						    yourself);
+				   register: ((SpBrowseImplementorsCommand forSpecContext: self)
+						    name: 'Browse method implementors';
+						    shortcutKey: $I;
+						    yourself);
+				   register: ((SpBrowseSendersCommand forSpecContext: self)
+						    name: 'Browse method senders';
+						    shortcutKey: $S;
+						    yourself);
+				   beDisplayedAsGroup;
+				   yourself);
+		  register: ((PinnerResetMethodsHistoryCommand
+				    forSpecWithIconNamed: #back
+				    shortcutKey: $R)
+				   name: 'Reset methods history';
+				   context: self);
+		  register: ((PinnerInspectMethodCommand
+				    forSpecWithIconNamed: #smallInspectIt
+				    shortcutKey: $I)
+				   name: 'Inspect';
+				   context: self);
+		  yourself
 ]
 
 { #category : 'showing' }
@@ -382,26 +446,32 @@ PinnerSpMainPresenter >> open [
 PinnerSpMainPresenter >> packageActionsCmdGroup [
 
 	^ CmCommandGroup forSpec
-		beRoot;
-		register: ((CmCommandGroup named: 'Browsing commands') asSpecGroup
-			register: ((PinnerBrowseDependenciesCommand
-				forSpecWithIconNamed: #smallHierarchyBrowser
-				shortcutKey: $D)
-					name: 'Browse package dependencies';
-					context: self);
-			register: ((PinnerBrowsePackageCommand
-				forSpecWithIconNamed: #smallHierarchyBrowser
-				shortcutKey: $B)
-					name: 'Browse package';
-					context: self);
-			beDisplayedAsGroup;
-			yourself);
-		register: ((PinnerResetHistoryCommand
-			forSpecWithIconNamed: #back
-			shortcutKey: $R)
-				name: 'Reset history';
-				context: self);
-		yourself
+		  beRoot;
+		  register:
+			  ((CmCommandGroup named: 'Browsing commands') asSpecGroup
+				   register: ((PinnerBrowseDependenciesCommand
+						     forSpecWithIconNamed: #smallHierarchyBrowser
+						     shortcutKey: $D)
+						    name: 'Browse package dependencies';
+						    context: self);
+				   register: ((PinnerBrowsePackageCommand
+						     forSpecWithIconNamed: #smallHierarchyBrowser
+						     shortcutKey: $B)
+						    name: 'Browse package';
+						    context: self);
+				   beDisplayedAsGroup;
+				   yourself);
+		  register: ((PinnerResetAllHistoryCommand
+				    forSpecWithIconNamed: #back
+				    shortcutKey: $R)
+				   name: 'Reset all history';
+				   context: self);
+		  register: ((PinnerInspectPackageCommand
+				    forSpecWithIconNamed: #smallInspectIt
+				    shortcutKey: $I)
+				   name: 'Inspect';
+				   context: self);
+		  yourself
 ]
 
 { #category : 'callbacks' }
@@ -412,6 +482,24 @@ PinnerSpMainPresenter >> resetAllSelections [
 	packagesListPresenter items: self visitedPackages asOrderedSet.
 	classesListPresenter items: self visitedClasses asOrderedSet.
 	methodsListPresenter items: self visitedMethods asOrderedSet
+]
+
+{ #category : 'backstops' }
+PinnerSpMainPresenter >> selectedClass [
+
+	^ classesListPresenter selectedItem
+]
+
+{ #category : 'backstops' }
+PinnerSpMainPresenter >> selectedMethod [
+
+	^ methodsListPresenter selectedItem
+]
+
+{ #category : 'accessing' }
+PinnerSpMainPresenter >> selectedPackage [
+
+	^ packagesListPresenter selectedItem
 ]
 
 { #category : 'accessing - model' }
