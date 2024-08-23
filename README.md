@@ -24,12 +24,17 @@ Pinner is a Spec application that displays your Pharo's browsing history. It wor
 
 The idea is that you browse packages, classes, and methods as always, and Pinner collects this history along with its occurrences. The Pinner UI could be shown or hidden, but the collector still works by pinning visited objects in your browsers. When the Pinner window is opened, clicking on a pinned package will filter and display the classes and methods visited in that package. Clicking in a pinned class will filter and display the methods in that class that were visited.
 
-## Details
+## Features
 
-- You can sort packages, classes, and methods by name by clicking on the header of each table. Similarly, you can sort by visit count by clicking on the # at the header of each table.
+- Sorting: You can sort packages, classes, and methods by name by clicking on the header of each table. Similarly, you can sort by visit count by clicking on the # at the header of each table.
+- Supports multiple browser visiting history collection.
+- Different versions of a visited method count as a single method. This means that visiting, modifying, and revisiting a method are not stored as two separate entries in the history collector. So, in this case, it will be counted as two visits to the same method.
+- Reset global history, or reset pinned objects by category.
+
+## Usage notes
+
 - Visiting items (packages, classes, and methods) outside the browser (Calypso by default) does not register them as part of the history, and clicking items on other tools like Iceberg, Epicea, or Inspectors does not register them by default.
 - Double-click on the currently selected item to unselect any item in the Pinner.
-- Different versions of a visited method count as a single method. This means that visiting, modifying, and revisiting a method are not stored as two separate entries in the history collector. So, in this case, it will be counted as two visits to the same method.
 
 # Installation
 
