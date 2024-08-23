@@ -6,7 +6,8 @@
 
 - [Demo](#demo)
 - [Description](#description)
-  - [Details](#details) 
+  - [Features](#features)
+  - [Usage notes](#usage-notes)
 - [Installation](#installation)
   - [Baseline String](#baseline-string)
 - [Implementation notes](#implementation-note)
