@@ -253,7 +253,6 @@ PinnerSpMainPresenter >> initializeClassesList [
 				yourself);
 		addColumn: self initializeClassListCountColumn;
 		addColumn: self initializeClassListNameColumn;
-		contextMenu: [ self classActionsCmdGroup asMenuPresenter ];
 		whenSelectedItemChangedDo: [ : class | self updateMethodsList: class ];
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
