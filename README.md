@@ -17,6 +17,9 @@
 
 # Demo
 
+> [!NOTE]
+> Pinner works only in Pharo >= 13
+
 https://github.com/user-attachments/assets/21fd3129-db53-4fc9-8ea8-f866882df9c5
 
 # Description
