@@ -18,7 +18,10 @@ Class {
 		'presenter'
 	],
 	#classVars : [
-		'PinnedObjects',
+		'PinnedClasses',
+		'PinnedMethods',
+		'PinnedPackageTags',
+		'PinnedPackages',
 		'UniqueInstance'
 	],
 	#category : 'Pinner-Core',
@@ -47,22 +50,21 @@ Use #uniqueInstance to access the instance.'
 
 { #category : 'accessing' }
 PinnerCollector class >> pinnedObjects [
-
-	^ PinnedObjects
-		ifNil: [ PinnedObjects := self collectionClass new ]
+	^ self uniqueInstance pinnedObjects
 ]
 
 { #category : 'accessing' }
 PinnerCollector class >> pinnedObjects: aCollection [
-
-	 PinnedObjects := aCollection
+	self uniqueInstance pinnedObjects: aCollection
 ]
 
-{ #category : 'class initialization' }
-PinnerCollector class >> reset [ 
+{ #category : 'accessing' }
+PinnerCollector class >> reset [
 	<script>
-
-	self pinnedObjects: nil.
+	PinnedClasses := nil.
+	PinnedMethods := nil.
+	PinnedPackages := nil.
+	PinnedPackageTags := nil
 ]
 
 { #category : 'class initialization' }
@@ -86,9 +88,8 @@ PinnerCollector >> browser: anObject [
 
 { #category : 'accessing' }
 PinnerCollector >> classes [
-	"Answer a <Collection> of <PinnedObject> representing recently visited classes"
-
-	^ self pinnedObjects select: [ : obj | obj isClass ]
+	"Answer a <Bag> of <String> representing recently visited classes"
+	^ self pinnedClasses
 ]
 
 { #category : 'requirements' }
@@ -101,50 +102,87 @@ PinnerCollector >> collectionClass [
 { #category : 'testing' }
 PinnerCollector >> hasPinnedHistory [
 	"Answer <true> if the receiver contains any history recorded"
-	
-	^ self pinnedObjects notEmpty
-
-	
+	^ self pinnedClasses notEmpty
+		or: [ self pinnedMethods notEmpty
+			or: [ self pinnedPackages notEmpty
+				or: [ self pinnedPackageTags notEmpty ] ] ]
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> methods [
-	"Answer a <Collection> of <PinnedObject> recently visited methods"
-
-	^ self pinnedObjects select: [ : obj | obj isMethod ]
+	"Answer a <Bag> of <String> recently visited methods"
+	^ self pinnedMethods
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> packageTags [
-	"Answer a <Collection> of <PinnedObject> representing representing recently visited package tags"
-
-	^ self pinnedObjects select: [ : obj | obj class == PackageTag ]
+	"Answer a <Bag> of <String> representing recently visited package tags"
+	^ self pinnedPackageTags
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> packages [
-	"Answer a <Collection> of <PinnedObject> representing recently visited packages"
-
-	^ self pinnedObjects select: [ : obj | obj isPackage ]
+	"Answer a <Bag> of <String> representing recently visited packages"
+	^ self pinnedPackages
 ]
 
-{ #category : 'adding' }
-PinnerCollector >> pinObjects: aCollection [
-	"Add visited Smalltalk objects in aCollection to the receiver"
+{ #category : 'private' }
+PinnerCollector >> pinObject: stObject [
+	"Private - Store the String representation of stObject in the matching history bag."
+	stObject isCompiledMethod
+		ifTrue: [ ^ self pinnedMethods add: (self stringForMethod: stObject) ].
+	stObject isClass
+		ifTrue: [
+			stObject isObsolete
+				ifFalse: [ self pinnedClasses add: (self stringForClass: stObject) ].
+			^ self ].
+	stObject isPackage
+		ifTrue: [ ^ self pinnedPackages add: (self stringForPackage: stObject) ].
+	stObject class == PackageTag
+		ifTrue: [ ^ self pinnedPackageTags add: (self stringForPackageTag: stObject) ]
+]
 
-	self pinnedObjects addAll: (self safePinningOf: aCollection)
+{ #category : 'pinning' }
+PinnerCollector >> pinObjects: aCollection [
+	"Add visited Smalltalk objects to the receiver, storing their String representation (class name or Class>>#selector)."
+	aCollection do: [ :stObject | self pinObject: stObject ]
+]
+
+{ #category : 'accessing' }
+PinnerCollector >> pinnedClasses [
+	^ PinnedClasses ifNil: [ PinnedClasses := self collectionClass new ]
+]
+
+{ #category : 'accessing' }
+PinnerCollector >> pinnedMethods [
+	^ PinnedMethods ifNil: [ PinnedMethods := self collectionClass new ]
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> pinnedObjects [
-
-	^ self class pinnedObjects
+	"Answer a combined <Bag> of all pinned String representations (for history checks)."
+	^ Bag new
+		addAll: self pinnedClasses;
+		addAll: self pinnedMethods;
+		addAll: self pinnedPackages;
+		addAll: self pinnedPackageTags;
+		yourself
 ]
 
 { #category : 'accessing' }
 PinnerCollector >> pinnedObjects: aCollection [
+	"Compatibility setter: reset all history."
+	self reset
+]
 
-	self class pinnedObjects: aCollection
+{ #category : 'accessing' }
+PinnerCollector >> pinnedPackageTags [
+	^ PinnedPackageTags ifNil: [ PinnedPackageTags := self collectionClass new ]
+]
+
+{ #category : 'accessing' }
+PinnerCollector >> pinnedPackages [
+	^ PinnedPackages ifNil: [ PinnedPackages := self collectionClass new ]
 ]
 
 { #category : 'accessing' }
@@ -158,33 +196,37 @@ PinnerCollector >> presenter: aPinnerSpMainPresenter [
 	presenter := aPinnerSpMainPresenter
 ]
 
-{ #category : 'removing' }
-PinnerCollector >> resetClassesHistory [ 
+{ #category : 'accessing' }
+PinnerCollector >> reset [
+	<script>
+	PinnedClasses := nil.
+	PinnedMethods := nil.
+	PinnedPackages := nil.
+	PinnedPackageTags := nil
+]
+
+{ #category : 'accessing' }
+PinnerCollector >> resetClassesHistory [
 	"Remove all pinned classes in the receiver"
-	
-	self pinnedObjects: (self pinnedObjects removeAll: self classes) 
+	PinnedClasses := nil
 ]
 
-{ #category : 'removing' }
-PinnerCollector >> resetHistory [ 
+{ #category : 'accessing' }
+PinnerCollector >> resetHistory [
 	"Remove all pinned objects in the receiver"
-	
-	self class reset.
+	self reset
 ]
 
-{ #category : 'removing' }
-PinnerCollector >> resetMethodsHistory [ 
+{ #category : 'accessing' }
+PinnerCollector >> resetMethodsHistory [
 	"Remove all pinned methods in the receiver"
-	
-	self pinnedObjects: (self pinnedObjects removeAll: self methods) 
-
+	PinnedMethods := nil
 ]
 
-{ #category : 'removing' }
-PinnerCollector >> resetPackagesHistory [ 
+{ #category : 'accessing' }
+PinnerCollector >> resetPackagesHistory [
 	"Remove all pinned packages in the receiver"
-	
-	self pinnedObjects: (self pinnedObjects removeAll: self packages) 
+	PinnedPackages := nil
 ]
 
 { #category : 'private' }
@@ -194,6 +236,30 @@ PinnerCollector >> safePinningOf: aCollection [
 	^ (aCollection 
 		reject: [ : stObject | stObject isClass and: [ stObject isObsolete ] ]
 		thenCollect: [ : stObject | PinnedObject on: stObject ])
+]
+
+{ #category : 'private' }
+PinnerCollector >> stringForClass: aClass [
+	"Answer the <String> representation of aClass"
+	^ aClass name asString
+]
+
+{ #category : 'private' }
+PinnerCollector >> stringForMethod: aCompiledMethod [
+	"Answer the <String> representation of aCompiledMethod as 'ClassName>>#selector'"
+	^ aCompiledMethod methodClass name asString , '>>#' , aCompiledMethod selector asString
+]
+
+{ #category : 'private' }
+PinnerCollector >> stringForPackage: aPackage [
+	"Answer the <String> representation of aPackage"
+	^ aPackage name asString
+]
+
+{ #category : 'private' }
+PinnerCollector >> stringForPackageTag: aPackageTag [
+	"Answer the <String> representation of aPackageTag"
+	^ aPackageTag name asString
 ]
 
 { #category : 'actions' }

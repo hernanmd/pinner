@@ -88,19 +88,19 @@ PinnerSpMainPresenter >> displayCompiledMethod: cm [
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseClass [
-
-	self systemNavigation browse: self selectedClass reference
+	self selectedClass ifNotNil: [ :className |
+		(Smalltalk globals classNamed: className) ifNotNil: [ :cls |
+			self systemNavigation browse: cls ] ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseClassReferences [
-
 	| result classOrTrait |
-
-	result := self selectedClass reference.
+	self selectedClass ifNil: [ ^ self ].
+	result := Smalltalk globals classNamed: self selectedClass.
+	result ifNil: [ ^ self ].
 	(result isClass or: [ result isTrait ])
 		ifFalse: [ result := result class ].
-
 	classOrTrait := result instanceSide.
 	classOrTrait isTrait
 		ifTrue: [ self systemNavigation browseAllUsersOfTrait: classOrTrait ]
@@ -109,51 +109,44 @@ PinnerSpMainPresenter >> doBrowseClassReferences [
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseHierarchy [
-
-	self systemNavigation browseHierarchy: classesListPresenter selectedItem reference
+	classesListPresenter selectedItem ifNotNil: [ :className |
+		(Smalltalk globals classNamed: className) ifNotNil: [ :cls |
+			self systemNavigation browseHierarchy: cls ] ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseImplementors [
-
-	| realSelection |
-	
-	realSelection := self selectedMethod reference.
-	self systemNavigation browseAllImplementorsOf: realSelection selector
+	self selectedMethod ifNotNil: [ :methodString |
+		self systemNavigation browseAllImplementorsOf: (self selectorFromMethodString: methodString) ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseMethodReferences [
-
-	| realSelection |
-	
-	realSelection := self selectedMethod reference.
-	self systemNavigation browseAllSendersOrUsersOf: realSelection selector
+	self selectedMethod ifNotNil: [ :methodString |
+		self systemNavigation browseAllSendersOrUsersOf: (self selectorFromMethodString: methodString) ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowsePackage [
-
-	self systemNavigation browse: packagesListPresenter selectedItem reference
+	packagesListPresenter selectedItem ifNotNil: [ :packageName |
+		(PackageOrganizer default packageNamed: packageName ifAbsent: [ nil ]) ifNotNil: [ :pkg |
+			self systemNavigation browse: pkg ] ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowsePackageDependencies [
-
 	| analyzedPackage presenter |
-	analyzedPackage := DADependencyChecker new daPackageFor: packagesListPresenter selectedItem referenceName.
+	packagesListPresenter selectedItem ifNil: [ ^ self ].
+	analyzedPackage := StDependencyChecker new daPackageFor: packagesListPresenter selectedItem.
 	presenter := DATabPackageDependenciesPresenter on: analyzedPackage.
 	presenter open.
-	presenter withWindowDo: [ : w | w title: 'Package Dependencies' ]
+	presenter withWindowDo: [ :w | w title: 'Package Dependencies' ]
 ]
 
 { #category : 'actions' }
 PinnerSpMainPresenter >> doBrowseSenders [
-
-	| realSelection |
-	
-	realSelection := self selectedMethod reference.
-	self systemNavigation browseAllSendersOf: realSelection selector
+	self selectedMethod ifNotNil: [ :methodString |
+		self systemNavigation browseAllSendersOf: (self selectorFromMethodString: methodString) ]
 ]
 
 { #category : 'actions - reset' }
@@ -229,31 +222,26 @@ PinnerSpMainPresenter >> initializeClassListCountColumn [
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeClassListNameColumn [
-
 	^ (SpStringTableColumn
-			title: 'Class'
-			evaluated: [ : cls | cls name ])
-				sortFunction: [ : c1 : c2 | c1 name threeWayCompareTo: c2 name ];
-				yourself
-
+		title: 'Class'
+		evaluated: [ :clsName | clsName ])
+			sortFunction: [ :c1 :c2 | c1 threeWayCompareTo: c2 ];
+			yourself
 ]
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeClassesList [
-
 	| cmdGroup |
-
 	cmdGroup := self classActionsCmdGroup.
-
-	classesListPresenter := self newTable 
+	classesListPresenter := self newTable
 		beSingleSelection;
-		addColumn: 
-			((SpImageTableColumn evaluated: [ :cls | self iconNamed: cls systemIconName ])
+		addColumn:
+			((SpImageTableColumn evaluated: [ :clsName | self iconNamed: #class ])
 				width: 20;
 				yourself);
 		addColumn: self initializeClassListCountColumn;
 		addColumn: self initializeClassListNameColumn;
-		whenSelectedItemChangedDo: [ : class | self updateMethodsList: class ];
+		whenSelectedItemChangedDo: [ :class | self updateMethodsList: class ];
 		contextMenu: [ cmdGroup asMenuPresenter ];
 		contextKeyBindings: (self keybindsForFromContextMenu: cmdGroup);
 		items: self visitedClasses asOrderedSet;
@@ -271,27 +259,23 @@ PinnerSpMainPresenter >> initializeFocus [
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeMethodListNameColumn [
-
 	^ (SpStringTableColumn
-		  title: 'Method'
-		  evaluated: [ : pinnedMethod | self displayCompiledMethod: pinnedMethod reference ])
-				beSortable;
-				displayBold;
-				sortFunction: [ : m1 : m2 | m1 selector threeWayCompareTo: m2 selector ];
-				yourself
+		title: 'Method'
+		evaluated: [ :methodString | methodString ])
+			beSortable;
+			displayBold;
+			sortFunction: [ :m1 :m2 | m1 threeWayCompareTo: m2 ];
+			yourself
 ]
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializeMethodsList [
-
 	| cmdGroup |
-
 	cmdGroup := self methodActionsCmdGroup.
-
 	methodsListPresenter := self newTable
 		beSingleSelection;
-		addColumn: 
-			((SpImageTableColumn evaluated: [ : mth | self iconNamed: mth systemIconName ])
+		addColumn:
+			((SpImageTableColumn evaluated: [ :methodString | self iconNamed: #methodArtifact ])
 				width: 20;
 				yourself);
 		addColumn: self initializeMethodsListCountColumn;
@@ -329,14 +313,13 @@ PinnerSpMainPresenter >> initializePackageListCountColumn [
 
 { #category : 'initialization' }
 PinnerSpMainPresenter >> initializePackageListNameColumn [
-
 	^ (SpStringTableColumn
 		  title: 'Package'
-		  evaluated: [ : pkg | pkg name ])
-				beSortable;
-				displayBold;
-				sortFunction: [ : p1 : p2 | p1 name threeWayCompareTo: p2 name ];
-				yourself
+		  evaluated: [ :pkgName | pkgName ])
+			beSortable;
+			displayBold;
+			sortFunction: [ :p1 :p2 | p1 threeWayCompareTo: p2 ];
+			yourself
 ]
 
 { #category : 'initialization' }
@@ -501,6 +484,12 @@ PinnerSpMainPresenter >> selectedPackage [
 	^ packagesListPresenter selectedItem
 ]
 
+{ #category : 'private' }
+PinnerSpMainPresenter >> selectorFromMethodString: aString [
+	"Parse the selector from a 'Class>>#selector' String."
+	^ (aString splitOn: '>>#') last asSymbol
+]
+
 { #category : 'accessing - model' }
 PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 
@@ -510,47 +499,52 @@ PinnerSpMainPresenter >> setModelBeforeInitialization: aModel [
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClasses: aCollection [
 
-	classesListPresenter items: aCollection asOrderedSet
+	classesListPresenter ifNotNil: [ :p |
+		p items: aCollection asOrderedSet ]
 ]
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateClassesList: aPackageOrNil [
-	"Private - Package selection callback to update class list with those classes that belongs to aPackageOrNil"
-
+	"Private - Package selection callback to update class list with those classes that belongs to aPackageOrNil (a package name String)."
 	aPackageOrNil
-		ifNotNil: [ : package |
+		ifNotNil: [ :packageName |
 			"If selected item is the same as the one already selected, we unselect and clean selection"
-			package = oldSelectedPackage
+			packageName = oldSelectedPackage
 				ifTrue: [ self resetAllSelections ]
 				ifFalse: [
 					| filteredItems |
-					filteredItems := self visitedClasses select: [ : pinnedClass | pinnedClass package = aPackageOrNil reference ].
+					filteredItems := self visitedClasses select: [ :className |
+						| cls |
+						cls := Smalltalk globals classNamed: className.
+						cls notNil and: [ cls package name = packageName ] ].
 					classesListPresenter items: filteredItems asOrderedSet.
 					methodsListPresenter items: Array empty.
-					oldSelectedPackage := package ] ]
+					oldSelectedPackage := packageName ] ]
 ]
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateMethods: aCollection [
 
-	methodsListPresenter items: aCollection asOrderedSet
+	methodsListPresenter ifNotNil: [ : p |
+		p items: aCollection asOrderedSet ]
 ]
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updateMethodsList: aClassOrNil [
-	"Private - Class selection callback to update methods list with those methods that belongs to aClassOrNil"
-
+	"Private - Class selection callback to update methods list with those methods that belongs to aClassOrNil (a class name String)."
 	aClassOrNil
-		ifNotNil: [ : class |
-			| filteredItems |
-			filteredItems := self visitedMethods select: [ : pinnedMethod | pinnedMethod reference methodClass = aClassOrNil reference ].
+		ifNotNil: [ :className |
+			| prefix filteredItems |
+			prefix := className asString , '>>#'.
+			filteredItems := self visitedMethods select: [ :methodString |
+				methodString beginsWith: prefix ].
 			methodsListPresenter items: filteredItems asOrderedSet ]
 ]
 
 { #category : 'callbacks' }
 PinnerSpMainPresenter >> updatePackages: aCollection [
 
-	packagesListPresenter items: aCollection asOrderedSet
+	packagesListPresenter notNil ifTrue: [ packagesListPresenter items: aCollection asOrderedSet ]
 ]
 
 { #category : 'accessing' }
